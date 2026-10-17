@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SGRH.Domain\SGRH.Domain.csproj" />
+    <ProjectReference Include="..\SGRH.Model\SGRH.Model.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Context\" />
+    <Folder Include="Base\" />
+    <Folder Include="Repositories\Configuration\" />
+    <Folder Include="Repositories\Reservation\" />
+    <Folder Include="Repositories\Notification\" />
+    <Folder Include="Repositories\Security\" />
+  </ItemGroup>
+
+</Project>

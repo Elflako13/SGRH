@@ -1,0 +1,6 @@
+@SGRH.Api_HostAddress = http://localhost:5084
+
+GET {{SGRH.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
