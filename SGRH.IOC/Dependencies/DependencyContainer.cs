@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using SGRH.Domain.Services;
 
 namespace SGRH.IOC.Dependencies
 {
@@ -10,7 +11,8 @@ namespace SGRH.IOC.Dependencies
     {
         public static IServiceCollection AddSgrhDependencies(this IServiceCollection services)
         {
-            // Dominio: aquí se registrarán los servicios del dominio.
+            // Dominio
+            services.AddSingleton<ICalculadoraPrecio, CalculadoraPrecioPorNoche>();
 
             // Persistencia: aquí se registrarán los repositorios de SGRH.Persistence
             // (IHotelRepository, IReservaRepository, ...) cuando se implementen.
