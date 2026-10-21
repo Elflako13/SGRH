@@ -1,6 +1,7 @@
 using SGRH.Domain.Entities.Reservation;
+using SGRH.Domain.Repository;
 
-namespace SGRH.Domain.Repository.Reservation
+namespace SGRH.Persistence.Interfaces.Reservation
 {
     public interface IHistorialReservaRepository : IBaseRepository<HistorialReserva>
     {

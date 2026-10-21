@@ -24,6 +24,7 @@ namespace SGRH.IOC.Dependencies
             // Repositorios por módulo (schema)
             services.AddConfigurationDependency();
             services.AddSecurityDependency();
+            services.AddReservationDependency();
 
             return services;
         }

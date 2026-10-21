@@ -12,9 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\Reservation\" />
     <Folder Include="Interfaces\Notification\" />
-    <Folder Include="Repositories\Reservation\" />
     <Folder Include="Repositories\Notification\" />
   </ItemGroup>
 
