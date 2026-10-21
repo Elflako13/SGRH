@@ -14,10 +14,8 @@
   <ItemGroup>
     <Folder Include="Interfaces\Reservation\" />
     <Folder Include="Interfaces\Notification\" />
-    <Folder Include="Interfaces\Security\" />
     <Folder Include="Repositories\Reservation\" />
     <Folder Include="Repositories\Notification\" />
-    <Folder Include="Repositories\Security\" />
   </ItemGroup>
 
   <ItemGroup>

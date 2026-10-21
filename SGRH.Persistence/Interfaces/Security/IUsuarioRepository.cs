@@ -1,6 +1,7 @@
 using SGRH.Domain.Entities.Security;
+using SGRH.Domain.Repository;
 
-namespace SGRH.Domain.Repository.Security
+namespace SGRH.Persistence.Interfaces.Security
 {
     public interface IUsuarioRepository : IBaseRepository<Usuario>
     {
