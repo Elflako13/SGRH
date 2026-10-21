@@ -35,6 +35,7 @@ namespace SGRH.Domain.Entities.Configuration
 
         // Se guarda también el hotel para poder crear el índice único (HotelId, Numero) - RN-005.
         public int HotelId { get; set; }
+        public Hotel? Hotel { get; set; }
 
         /// <summary>RN-007: solo se reservan habitaciones activas que no estén en mantenimiento ni fuera de servicio.</summary>
         public bool EsReservable()

@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // Registro de las dependencias de todas las capas (SGRH.IOC)
-builder.Services.AddSgrhDependencies();
+builder.Services.AddSgrhDependencies(builder.Configuration);
 
 var app = builder.Build();
 
