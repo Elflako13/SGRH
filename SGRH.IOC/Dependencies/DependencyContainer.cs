@@ -25,6 +25,7 @@ namespace SGRH.IOC.Dependencies
             services.AddConfigurationDependency();
             services.AddSecurityDependency();
             services.AddReservationDependency();
+            services.AddNotificationDependency();
 
             return services;
         }
