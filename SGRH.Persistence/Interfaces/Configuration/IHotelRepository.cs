@@ -1,10 +1,11 @@
 using SGRH.Domain.Entities.Configuration;
+using SGRH.Domain.Repository;
 
-namespace SGRH.Domain.Repository.Configuration
+namespace SGRH.Persistence.Interfaces.Configuration
 {
     public interface IHotelRepository : IBaseRepository<Hotel>
     {
-        /// <summary>Trae el hotel con sus pisos y habitaciones (CU-006).</summary>
+        /// <summary>CU-006: hotel con sus pisos y habitaciones.</summary>
         Task<Hotel?> GetConEstructuraAsync(int hotelId);
     }
 }

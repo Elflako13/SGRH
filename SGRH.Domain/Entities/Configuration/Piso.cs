@@ -32,6 +32,7 @@ namespace SGRH.Domain.Entities.Configuration
             // RN-004: la habitación queda en este piso y, por extensión, en este hotel.
             habitacion.PisoId = Id;
             habitacion.HotelId = HotelId;
+            habitacion.Hotel = Hotel;
             habitacion.Piso = this;
             Habitaciones.Add(habitacion);
             MarcarModificacion();

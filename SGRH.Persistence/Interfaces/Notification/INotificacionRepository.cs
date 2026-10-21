@@ -1,6 +1,7 @@
 using SGRH.Domain.Entities.Notification;
+using SGRH.Domain.Repository;
 
-namespace SGRH.Domain.Repository.Notification
+namespace SGRH.Persistence.Interfaces.Notification
 {
     public interface INotificacionRepository : IBaseRepository<Notificacion>
     {
