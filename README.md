@@ -22,7 +22,7 @@ Solution 'SGRH' (10 proyectos)
 │   │   │   ├── Reservation       Huesped, Reserva, HistorialReserva
 │   │   │   ├── Notification      Notificacion
 │   │   │   └── Security          Usuario, Permisos
-│   │   ├── Repository            IBaseRepository<T> + interfaces por schema
+│   │   ├── Repository            IBaseRepository<T>
 │   │   ├── Enums                 Estados, tipos, canal y rol
 │   │   ├── ValueObjects          RangoFechas
 │   │   ├── Services              ICalculadoraPrecio, CalculadoraPrecioPorNoche
@@ -30,18 +30,36 @@ Solution 'SGRH' (10 proyectos)
 │   └── SGRH.Model                Modelos de consulta (vistas con datos combinados)
 ├── Infraestructure
 │   ├── SGRH.Infraestructure      Servicios externos (notificaciones, fecha del sistema)
-│   └── SGRH.Persistence          Acceso a datos: Context, repositorios por schema
+│   └── SGRH.Persistence          Acceso a datos con Entity Framework Core
+│       ├── Base                  BaseRepository<T>
+│       ├── Context               SGRHContext (mapeo por schema)
+│       ├── Interfaces            Configuration, Reservation, Notification, Security
+│       └── Repositories          Configuration, Reservation, Notification, Security
 ├── IOC
 │   └── SGRH.IOC                  Registro de dependencias (punto de composición)
 ├── Test
 │   ├── SGRH.Application.Test     Pruebas xUnit de las reglas del dominio
-│   └── SGRH.Persistence.Test     Pruebas de persistencia (próximas fases)
+│   └── SGRH.Persistence.Test     Pruebas de los repositorios con SQLite en memoria
 └── Web
     └── SGRH.Web                  ASP.NET Core MVC
 ```
 
-Las subcarpetas de `Entities` y `Repository` corresponden a los **schemas** de la base de datos:
-`Configuration`, `Reservation`, `Notification` y `Security`.
+Las subcarpetas de `Entities` (dominio) y de `Interfaces` y `Repositories` (persistencia) corresponden
+a los **schemas** de la base de datos: `Configuration`, `Reservation`, `Notification` y `Security`.
+
+## Base de datos
+
+1. Abrir `Database/SGRH.sql` en SQL Server Management Studio y ejecutarlo (F5). Crea la base de datos
+   `SGRH`, sus 4 schemas, las tablas, los índices y datos de prueba.
+2. En `SGRH.Api/appsettings.json` y `SGRH.Web/appsettings.json`, cambiar `Server=localhost` de la cadena
+   `SGRHDb` por el nombre del servidor que aparece al conectarse en SSMS (por ejemplo `localhost\\SQLEXPRESS`).
+
+| Schema | Tablas | Repositorios |
+|---|---|---|
+| Configuration | CadenaHotelera, Hotel, Piso, Habitacion | CadenaHoteleraRepository, HotelRepository, PisoRepository, HabitacionRepository |
+| Reservation | Huesped, Reserva, HistorialReserva | HuespedRepository, ReservaRepository, HistorialReservaRepository |
+| Notification | Notificacion | NotificacionRepository |
+| Security | Usuario | UsuarioRepository |
 
 ## Dependencias entre proyectos
 
@@ -80,4 +98,4 @@ Las subcarpetas de `Entities` y `Repository` corresponden a los **schemas** de l
 
 1. Abrir `SGRH.sln` en Visual Studio 2022 (.NET 8).
 2. Compilar: **Compilar → Compilar solución**.
-3. Pruebas: **Prueba → Ejecutar todas las pruebas** (12 pruebas de reglas de negocio).
+3. Pruebas: **Prueba → Ejecutar todas las pruebas** (12 del dominio y 21 de los repositorios).
