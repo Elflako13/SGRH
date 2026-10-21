@@ -22,6 +22,7 @@ namespace SGRH.IOC.Dependencies
             services.AddSingleton<ICalculadoraPrecio, CalculadoraPrecioPorNoche>();
 
             // Repositorios por módulo (schema)
+            services.AddConfigurationDependency();
 
             return services;
         }
