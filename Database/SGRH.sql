@@ -1,14 +1,4 @@
-﻿/* ==========================================================================
-   SGRH - Sistema de Gestión de Reservas de Hoteles
-   Script de creación de la base de datos (SQL Server)
-
-   Cómo usarlo: abrir en SQL Server Management Studio y ejecutar (F5).
-   Crea la base de datos SGRH, los schemas Configuration, Reservation,
-   Notification y Security, sus tablas, índices y datos de prueba.
-
-   Las tablas se generaron a partir del modelo de Entity Framework Core
-   (SGRHContext), así que coinciden exactamente con el código.
-   ========================================================================== */
+﻿
 
 IF DB_ID(N'SGRH') IS NULL
     CREATE DATABASE [SGRH];
@@ -17,7 +7,7 @@ GO
 USE [SGRH];
 GO
 
-/* ------------------------------ Schemas y tablas ------------------------------ */
+
 
 IF SCHEMA_ID(N'Configuration') IS NULL EXEC(N'CREATE SCHEMA [Configuration];');
 GO

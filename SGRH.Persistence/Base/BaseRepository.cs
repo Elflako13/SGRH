@@ -7,11 +7,7 @@ using System.Linq.Expressions;
 
 namespace SGRH.Persistence.Base
 {
-    /// <summary>
-    /// Implementación genérica de IBaseRepository con Entity Framework Core.
-    /// Los repositorios de cada entidad heredan de esta clase (DRY) y sobrescriben
-    /// los métodos donde necesitan validar reglas de negocio antes de guardar.
-    /// </summary>
+  
     public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class
     {
         protected readonly SGRHContext _context;

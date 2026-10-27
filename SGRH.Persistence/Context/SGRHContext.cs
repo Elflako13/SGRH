@@ -6,10 +6,7 @@ using SGRH.Domain.Entities.Security;
 
 namespace SGRH.Persistence.Context
 {
-    /// <summary>
-    /// Contexto de Entity Framework Core de la base de datos SGRH.
-    /// Cada entidad se mapea a la tabla de su schema: Configuration, Reservation, Notification y Security.
-    /// </summary>
+    
     public class SGRHContext : DbContext
     {
         public SGRHContext(DbContextOptions<SGRHContext> options) : base(options)

@@ -5,7 +5,6 @@ namespace SGRH.Persistence.Interfaces.Configuration
 {
     public interface IHotelRepository : IBaseRepository<Hotel>
     {
-        /// <summary>CU-006: hotel con sus pisos y habitaciones.</summary>
         Task<Hotel?> GetConEstructuraAsync(int hotelId);
     }
 }
