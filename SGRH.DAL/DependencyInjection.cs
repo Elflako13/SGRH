@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SGRH.DAL.Repositories;
 using SGRH.DAL.Data;
 
 namespace SGRH.DAL
@@ -14,6 +15,10 @@ namespace SGRH.DAL
                 options.UseSqlServer(configuration.GetConnectionString("SGRHDb")));
 
             // Repositorios
+            services.AddScoped<ICadenaHoteleraRepository, CadenaHoteleraRepository>();
+            services.AddScoped<IHotelRepository, HotelRepository>();
+            services.AddScoped<IPisoRepository, PisoRepository>();
+            services.AddScoped<IHabitacionRepository, HabitacionRepository>();
 
             return services;
         }

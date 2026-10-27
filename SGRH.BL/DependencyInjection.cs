@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SGRH.BL.Services;
 using SGRH.DAL;
 
 namespace SGRH.BL
@@ -15,6 +16,10 @@ namespace SGRH.BL
             services.AddDataAccessLayer(configuration);
 
             // Servicios
+            services.AddScoped<ICadenaHoteleraService, CadenaHoteleraService>();
+            services.AddScoped<IHotelService, HotelService>();
+            services.AddScoped<IPisoService, PisoService>();
+            services.AddScoped<IHabitacionService, HabitacionService>();
 
             return services;
         }
