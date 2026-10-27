@@ -1,0 +1,31 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using SGRH.DAL.Repositories;
+using SGRH.DAL.Data;
+
+namespace SGRH.DAL
+{
+    /// <summary>Registra el contexto y los repositorios de la capa de acceso a datos.</summary>
+    public static class DependencyInjection
+    {
+        public static IServiceCollection AddDataAccessLayer(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDbContext<SGRHDbContext>(options =>
+                options.UseSqlServer(configuration.GetConnectionString("SGRHDb")));
+
+            // Repositorios
+            services.AddScoped<ICadenaHoteleraRepository, CadenaHoteleraRepository>();
+            services.AddScoped<IHotelRepository, HotelRepository>();
+            services.AddScoped<IPisoRepository, PisoRepository>();
+            services.AddScoped<IHabitacionRepository, HabitacionRepository>();
+            services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+            services.AddScoped<IHuespedRepository, HuespedRepository>();
+            services.AddScoped<IReservaRepository, ReservaRepository>();
+            services.AddScoped<IHistorialReservaRepository, HistorialReservaRepository>();
+            services.AddScoped<INotificacionRepository, NotificacionRepository>();
+
+            return services;
+        }
+    }
+}
