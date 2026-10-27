@@ -1,12 +1,12 @@
-using SGRH.IOC.Dependencies;
+using SGRH.BL;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Registro de las dependencias de todas las capas (SGRH.IOC)
-builder.Services.AddSgrhDependencies(builder.Configuration);
+// Capa de negocio y capa de acceso a datos
+builder.Services.AddBusinessLayer(builder.Configuration);
 
 var app = builder.Build();
 
