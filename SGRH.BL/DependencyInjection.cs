@@ -23,6 +23,7 @@ namespace SGRH.BL
             services.AddScoped<IUsuarioService, UsuarioService>();
             services.AddScoped<IHuespedService, HuespedService>();
             services.AddScoped<IReservaService, ReservaService>();
+            services.AddScoped<INotificacionService, NotificacionService>();
 
             return services;
         }
