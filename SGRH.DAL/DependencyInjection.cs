@@ -23,6 +23,7 @@ namespace SGRH.DAL
             services.AddScoped<IHuespedRepository, HuespedRepository>();
             services.AddScoped<IReservaRepository, ReservaRepository>();
             services.AddScoped<IHistorialReservaRepository, HistorialReservaRepository>();
+            services.AddScoped<INotificacionRepository, NotificacionRepository>();
 
             return services;
         }
