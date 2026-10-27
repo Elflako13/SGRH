@@ -19,6 +19,7 @@ namespace SGRH.DAL
             services.AddScoped<IHotelRepository, HotelRepository>();
             services.AddScoped<IPisoRepository, PisoRepository>();
             services.AddScoped<IHabitacionRepository, HabitacionRepository>();
+            services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
             return services;
         }

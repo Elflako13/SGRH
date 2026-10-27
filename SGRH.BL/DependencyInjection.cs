@@ -20,6 +20,7 @@ namespace SGRH.BL
             services.AddScoped<IHotelService, HotelService>();
             services.AddScoped<IPisoService, PisoService>();
             services.AddScoped<IHabitacionService, HabitacionService>();
+            services.AddScoped<IUsuarioService, UsuarioService>();
 
             return services;
         }
