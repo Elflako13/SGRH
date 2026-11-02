@@ -11,8 +11,10 @@ mantenerla simple (principio **KISS**).
 ```
 Solution 'SGRH' (4 proyectos)
 ├── SGRH.BL                     Capa de lógica de negocio
-│   ├── Services                Servicios (I...Service y ...Service)
-│   └── DependencyInjection.cs  AddBusinessLayer()
+│   ├── Configuration           ReservaOptions y NotificacionOptions (appsettings.json)
+│   ├── Services                Servicios con la lógica de negocio (I...Service y ...Service)
+│   ├── ApplicationSetup.cs     AddApplication(): opciones + servicios + repositorios
+│   └── DependencyInjection.cs  AddBusinessLayer(): registra los servicios y la DAL
 ├── SGRH.BL.Tests               Pruebas xUnit (reglas, repositorios y servicios)
 ├── SGRH.DAL                    Capa de acceso a datos
 │   ├── Data                    SGRHDbContext (Entity Framework Core)
@@ -29,7 +31,7 @@ Solution 'SGRH' (4 proyectos)
 | Capa | Proyecto | Responsabilidad |
 |---|---|---|
 | Presentación | SGRH.Web | Interfaz para el personal del hotel. |
-| Lógica de negocio | SGRH.BL | Servicios que usan los repositorios. |
+| Lógica de negocio | SGRH.BL | Servicios con las reglas de los casos de uso: disponibilidad, reservas, historial, notificaciones, inicio de sesión y permisos. |
 | Acceso a datos | SGRH.DAL | Entidades, contexto de EF Core y repositorios. |
 
 Dependencias: `SGRH.Web → SGRH.BL → SGRH.DAL`.
@@ -40,6 +42,13 @@ Dependencias: `SGRH.Web → SGRH.BL → SGRH.DAL`.
    `SGRH` con los schemas Configuration, Reservation, Notification y Security, y datos de prueba.
 2. Si hace falta, cambiar `Server=localhost` en la cadena `SGRHDb` de `SGRH.Web/appsettings.json`
    por el nombre del servidor que aparece en SSMS.
+
+Las reglas configurables están en `SGRH.Web/appsettings.json`:
+
+```json
+"ReservaOptions": { "MaximoNoches": 30, "DiasMaximoAnticipacion": 365 },
+"NotificacionOptions": { "CanalPorDefecto": "Correo", "Remitente": "Hotel Caribe Santo Domingo" }
+```
 
 ## Cómo ejecutar
 
