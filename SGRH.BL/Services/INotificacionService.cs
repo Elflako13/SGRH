@@ -8,7 +8,11 @@ namespace SGRH.BL.Services
         Task<OperationResult<List<NotificacionModel>>> GetByReservaAsync(int reservaId);
         Task<OperationResult<List<NotificacionModel>>> GetPendientesDeReintentoAsync();
         Task<OperationResult<NotificacionModel>> AddAsync(NotificacionAdd notificacion);
-        Task<OperationResult<bool>> MarcarEnviadaAsync(int notificacionId);
-        Task<OperationResult<bool>> MarcarFallidaAsync(int notificacionId, string error);
+
+        /// <summary>Registra el resultado de un intento de envío (enviada o fallida).</summary>
+        Task<OperationResult<bool>> RegistrarResultadoEnvioAsync(int notificacionId, bool enviada, string? error);
+
+        /// <summary>CU-016: vuelve a intentar las notificaciones fallidas con el método de envío indicado.</summary>
+        Task<OperationResult<int>> ReintentarFallidasAsync(Func<NotificacionModel, Task<bool>> enviar);
     }
 }
