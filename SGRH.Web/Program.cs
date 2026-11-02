@@ -5,8 +5,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Capa de negocio y capa de acceso a datos
-builder.Services.AddBusinessLayer(builder.Configuration);
+// Opciones de negocio, servicios (BL) y repositorios (DAL)
+builder.Services.AddApplication(builder.Configuration);
 
 var app = builder.Build();
 

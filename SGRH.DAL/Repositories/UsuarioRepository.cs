@@ -52,6 +52,17 @@ namespace SGRH.DAL.Repositories
             return Success(ToModel(usuario));
         }
 
+        public async Task<OperationResult<UsuarioModel>> ValidarCredencialesAsync(string nombreUsuario, string clave)
+        {
+            var usuario = await context.Usuarios.FirstOrDefaultAsync(u => u.NombreUsuario == nombreUsuario && u.Estatus);
+
+            // Mismo mensaje en ambos casos para no revelar si el usuario existe.
+            if (usuario is null || usuario.ClaveHash != HashClave(clave))
+                return Failure<UsuarioModel>("Usuario o clave incorrectos.");
+
+            return Success(ToModel(usuario));
+        }
+
         public async Task<OperationResult<bool>> AddAsync(UsuarioAdd usuario)
         {
             try
