@@ -22,10 +22,13 @@ namespace SGRH.DAL.Models
         /// <summary>RNF-001: indica si el rol del usuario permite realizar la acción.</summary>
         public bool TienePermiso(string accion)
         {
-            if (!Estatus)
-                return false;
+            return Estatus && PuedeRealizar(Rol, accion);
+        }
 
-            return Rol switch
+        /// <summary>RNF-001: acciones permitidas para cada rol.</summary>
+        public static bool PuedeRealizar(Rol rol, string accion)
+        {
+            return rol switch
             {
                 Rol.Administrador => true,
                 Rol.Recepcionista => PermisosRecepcion.Contains(accion),
