@@ -1,0 +1,34 @@
+@model TipoHabitacionViewModel
+@{
+    ViewData["Seccion"] = "Tipos de habitación";
+    ViewData["Title"] = Model.EsNuevo ? "Nuevo tipo de habitación" : "Editar tipo de habitación";
+    ViewData["Descripcion"] = "El nombre del tipo no se puede repetir.";
+}
+<partial name="_Encabezado" />
+
+<div class="panel form-contenedor">
+    <form method="post" asp-action="@(Model.EsNuevo ? "Create" : "Edit")" asp-route-id="@(Model.EsNuevo ? null : Model.Id)" class="panel-cuerpo">
+        <partial name="_Validacion" />
+        <div class="form-grid">
+            <div class="form-campo">
+                <label asp-for="Nombre"></label>
+                <input class="control" asp-for="Nombre" placeholder="Ej.: Suite" />
+                <span asp-validation-for="Nombre"></span>
+            </div>
+            <div class="form-campo">
+                <label asp-for="TarifaBase"></label>
+                <input class="control" asp-for="TarifaBase" type="number" step="0.01" min="1" />
+                <span asp-validation-for="TarifaBase"></span>
+                <div class="form-ayuda">Se propone al registrar una habitación de este tipo.</div>
+            </div>
+            <div class="form-campo ancho">
+                <label asp-for="Descripcion"></label>
+                <textarea class="control" asp-for="Descripcion" rows="3"></textarea>
+                <span asp-validation-for="Descripcion"></span>
+            </div>
+        </div>
+        <partial name="_FormPie" />
+    </form>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
