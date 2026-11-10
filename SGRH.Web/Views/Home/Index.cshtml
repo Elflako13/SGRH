@@ -1,8 +1,75 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model InicioViewModel
+@{
+    ViewData["Title"] = "Inicio";
+    int maximo = Math.Max(1, Model.HabitacionesPorEstado.Values.DefaultIfEmpty(0).Max());
+    string[] portadas = ["", "v2", "v3"];
 }
+<section class="hero">
+    <div>
+        <small>Sistema de Gestión de Reservas de Hoteles</small>
+        <h1>Toda la estructura de tus hoteles,<br /><span>en un solo lugar.</span></h1>
+        <p>Administra hoteles, bloques, pisos, habitaciones y tipos de habitación. Esta es la base que necesita el flujo de reservas.</p>
+        <a class="btn-app btn-primario" asp-controller="Hoteles" asp-action="Index"><partial name="_Icono" model="@("hotel")" /> Ver hoteles</a>
+    </div>
+    <div class="hero-ilustracion"><partial name="_Icono" model="@("hotel")" /></div>
+</section>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="stats">
+    <a class="panel stat" asp-controller="Hoteles" asp-action="Index"><span class="stat-icono"><partial name="_Icono" model="@("hotel")" /></span><span><span class="stat-valor">@Model.Hoteles</span><br /><span class="stat-texto">Hoteles activos</span></span></a>
+    <a class="panel stat" asp-controller="Bloques" asp-action="Index"><span class="stat-icono"><partial name="_Icono" model="@("bloque")" /></span><span><span class="stat-valor">@Model.Bloques</span><br /><span class="stat-texto">Bloques</span></span></a>
+    <a class="panel stat" asp-controller="Pisos" asp-action="Index"><span class="stat-icono"><partial name="_Icono" model="@("piso")" /></span><span><span class="stat-valor">@Model.Pisos</span><br /><span class="stat-texto">Pisos</span></span></a>
+    <a class="panel stat" asp-controller="Habitaciones" asp-action="Index"><span class="stat-icono"><partial name="_Icono" model="@("habitacion")" /></span><span><span class="stat-valor">@Model.Habitaciones</span><br /><span class="stat-texto">Habitaciones</span></span></a>
+    <a class="panel stat" asp-controller="TiposHabitacion" asp-action="Index"><span class="stat-icono"><partial name="_Icono" model="@("tipo")" /></span><span><span class="stat-valor">@Model.TiposHabitacion</span><br /><span class="stat-texto">Tipos de habitación</span></span></a>
+</div>
+
+<div class="dos-columnas">
+    <div>
+        <h2 class="panel-titulo">Hoteles de la cadena</h2>
+        <div class="grid-hoteles">
+            @for (int i = 0; i < Model.HotelesDestacados.Count; i++)
+            {
+                var h = Model.HotelesDestacados[i];
+                <a class="panel hotel-card" asp-controller="Hoteles" asp-action="Details" asp-route-id="@h.HotelId">
+                    <div class="hotel-portada @portadas[i % 3]"><partial name="_Icono" model="@("hotel")" /></div>
+                    <div class="panel-cuerpo">
+                        <span class="hotel-ciudad">@h.Ciudad</span>
+                        <span class="hotel-nombre" style="color:var(--texto)">@h.Nombre</span>
+                        <partial name="_Estrellas" model="h.Estrellas" />
+                        <div class="hotel-datos"><span><b>@h.CantidadPisos</b> pisos</span><span><b>@h.CantidadHabitaciones</b> habitaciones</span></div>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+
+    <div>
+        <div class="panel" style="margin-bottom:18px"><div class="panel-cuerpo">
+            <h2 class="panel-titulo">Habitaciones por estado</h2>
+            @foreach (var (estado, cantidad) in Model.HabitacionesPorEstado)
+            {
+                <div class="fila-estado">
+                    <span>@estado</span>
+                    <div class="barra"><span style="width:@(cantidad * 100 / maximo)%"></span></div>
+                    <b>@cantidad</b>
+                </div>
+            }
+        </div></div>
+
+        <div class="panel"><div class="panel-cuerpo">
+            <h2 class="panel-titulo">No disponibles ahora</h2>
+            @if (!Model.HabitacionesNoDisponibles.Any())
+            {
+                <p class="resumen">Todas las habitaciones están disponibles.</p>
+            }
+            <table class="tabla">
+                @foreach (var h in Model.HabitacionesNoDisponibles)
+                {
+                    <tr>
+                        <td><a asp-controller="Habitaciones" asp-action="Details" asp-route-id="@h.HabitacionId"><b>@h.Numero</b></a><span class="sub">@h.Hotel</span></td>
+                        <td style="text-align:right"><partial name="_EstadoHabitacion" model="h.Estado" /></td>
+                    </tr>
+                }
+            </table>
+        </div></div>
+    </div>
 </div>

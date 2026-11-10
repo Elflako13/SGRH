@@ -482,3 +482,8 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Base de datos SQLite local (modo sin SQL Server)
+*.db
+*.db-shm
+*.db-wal

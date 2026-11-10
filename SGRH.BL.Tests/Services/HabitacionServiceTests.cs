@@ -14,7 +14,7 @@ namespace SGRH.BL.Tests.Services
             using var db = new TestDatabase();
             var datos = db.Sembrar();
             using var context = db.CrearContexto();
-            var service = new HabitacionService(new HabitacionRepository(context), Opciones.Reserva());
+            var service = new HabitacionService(new HabitacionRepository(context), Opciones.Reserva(), Log.De<HabitacionService>());
 
             var resultado = await service.GetDisponiblesAsync(datos.HotelId, Hoy.AddDays(1), Hoy.AddDays(3), 0);
 
@@ -28,7 +28,7 @@ namespace SGRH.BL.Tests.Services
             using var db = new TestDatabase();
             var datos = db.Sembrar();
             using var context = db.CrearContexto();
-            var service = new HabitacionService(new HabitacionRepository(context), Opciones.Reserva());
+            var service = new HabitacionService(new HabitacionRepository(context), Opciones.Reserva(), Log.De<HabitacionService>());
 
             var resultado = await service.GetDisponiblesAsync(datos.HotelId, Hoy.AddDays(-3), Hoy.AddDays(1), 1);
 
@@ -42,7 +42,7 @@ namespace SGRH.BL.Tests.Services
             using var db = new TestDatabase();
             var datos = db.Sembrar();
             using var context = db.CrearContexto();
-            var service = new HabitacionService(new HabitacionRepository(context), Opciones.Reserva(maximoNoches: 7));
+            var service = new HabitacionService(new HabitacionRepository(context), Opciones.Reserva(maximoNoches: 7), Log.De<HabitacionService>());
 
             var resultado = await service.GetDisponiblesAsync(datos.HotelId, Hoy.AddDays(1), Hoy.AddDays(10), 1);
 
@@ -56,7 +56,7 @@ namespace SGRH.BL.Tests.Services
             using var db = new TestDatabase();
             var datos = db.Sembrar();
             using var context = db.CrearContexto();
-            var service = new HabitacionService(new HabitacionRepository(context), Opciones.Reserva(diasAnticipacion: 30));
+            var service = new HabitacionService(new HabitacionRepository(context), Opciones.Reserva(diasAnticipacion: 30), Log.De<HabitacionService>());
 
             var resultado = await service.GetDisponiblesAsync(datos.HotelId, Hoy.AddDays(60), Hoy.AddDays(62), 1);
 
@@ -69,7 +69,7 @@ namespace SGRH.BL.Tests.Services
             using var db = new TestDatabase();
             var datos = db.Sembrar();
             using var context = db.CrearContexto();
-            var service = new HabitacionService(new HabitacionRepository(context), Opciones.Reserva());
+            var service = new HabitacionService(new HabitacionRepository(context), Opciones.Reserva(), Log.De<HabitacionService>());
 
             var resultado = await service.GetDisponiblesAsync(datos.HotelId, Hoy.AddDays(5), Hoy.AddDays(7), 1);
 

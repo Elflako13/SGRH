@@ -21,12 +21,8 @@ namespace SGRH.DAL.Repositories
         {
             try
             {
-                var pisos = await context.Pisos
-                                         .Include(p => p.Hotel)
-                                         .Where(p => p.Estatus)
-                                         .OrderBy(p => p.HotelId).ThenBy(p => p.Numero)
-                                         .ToListAsync();
-                return Success(pisos.Select(ToModel).ToList());
+                var pisos = await Consultar().OrderBy(p => p.Hotel).ThenBy(p => p.Numero).ToListAsync();
+                return Success(pisos);
             }
             catch (Exception)
             {
@@ -38,12 +34,10 @@ namespace SGRH.DAL.Repositories
         {
             try
             {
-                var pisos = await context.Pisos
-                                         .Include(p => p.Hotel)
-                                         .Where(p => p.HotelId == hotelId && p.Estatus)
-                                         .OrderBy(p => p.Numero)
-                                         .ToListAsync();
-                return Success(pisos.Select(ToModel).ToList());
+                var pisos = await Consultar().Where(p => p.HotelId == hotelId && p.Estatus)
+                                             .OrderBy(p => p.Numero)
+                                             .ToListAsync();
+                return Success(pisos);
             }
             catch (Exception)
             {
@@ -53,11 +47,11 @@ namespace SGRH.DAL.Repositories
 
         public async Task<OperationResult<PisoModel>> GetByIdAsync(int id)
         {
-            var piso = await context.Pisos.Include(p => p.Hotel).FirstOrDefaultAsync(p => p.Id == id);
+            var piso = await Consultar().FirstOrDefaultAsync(p => p.PisoId == id);
             if (piso is null)
                 return Failure<PisoModel>("El piso no existe.");
 
-            return Success(ToModel(piso));
+            return Success(piso);
         }
 
         public async Task<OperationResult<bool>> AddAsync(PisoAdd piso)
@@ -75,6 +69,7 @@ namespace SGRH.DAL.Repositories
                 {
                     Numero = piso.Numero,
                     HotelId = piso.HotelId,
+                    BloqueId = piso.BloqueId,
                     UsuarioCreacion = piso.UsuarioCreacion
                 });
                 await context.SaveChangesAsync();
@@ -97,11 +92,16 @@ namespace SGRH.DAL.Repositories
                 if (entity is null)
                     return Failure<bool>("El piso no existe.");
 
+                // RN-002: el piso no se puede trasladar a otro hotel.
+                if (entity.HotelId != piso.HotelId)
+                    return Failure<bool>("Un piso pertenece a un solo hotel y no puede trasladarse a otro (RN-002).");
+
                 var validation = await ValidatePisoAsync(piso, piso.Id);
                 if (validation is not null)
                     return Failure<bool>(validation);
 
                 entity.Numero = piso.Numero;
+                entity.BloqueId = piso.BloqueId;
                 entity.FechaModificacion = DateTime.Now;
                 entity.UsuarioModificacion = piso.UsuarioModificacion;
                 await context.SaveChangesAsync();
@@ -130,16 +130,45 @@ namespace SGRH.DAL.Repositories
                                                                        && (r.Estado == EstadoReserva.Pendiente || r.Estado == EstadoReserva.Confirmada)
                                                                        && r.Fechas.Salida > hoy);
                 if (tieneReservas)
-                    return Failure<bool>("No se puede eliminar el piso porque tiene reservas activas futuras (RN-018).");
+                    return Failure<bool>("No se puede inactivar el piso porque tiene reservas activas futuras (RN-018).");
 
                 entity.Inactivar();
                 entity.UsuarioModificacion = piso.UsuarioModificacion;
                 await context.SaveChangesAsync();
-                return Success(true, "Piso eliminado correctamente.");
+                return Success(true, "Piso inactivado correctamente.");
             }
             catch (Exception)
             {
-                return Failure<bool>("Ocurrió un error eliminando el piso.");
+                return Failure<bool>("Ocurrió un error inactivando el piso.");
+            }
+        }
+
+        /// <summary>RF-004: vuelve a activar un piso validando que no exista otro activo con el mismo número (RN-003).</summary>
+        public async Task<OperationResult<bool>> ActivarAsync(int id, int? usuarioModificacion)
+        {
+            try
+            {
+                var entity = await context.Pisos.Include(p => p.Hotel).FirstOrDefaultAsync(p => p.Id == id);
+                if (entity is null)
+                    return Failure<bool>("El piso no existe.");
+
+                if (entity.Estatus)
+                    return Failure<bool>("El piso ya está activo.");
+
+                if (entity.Hotel is { Estatus: false })
+                    return Failure<bool>("No se puede activar el piso porque su hotel está inactivo.");
+
+                if (await context.Pisos.AnyAsync(p => p.HotelId == entity.HotelId && p.Numero == entity.Numero && p.Estatus))
+                    return Failure<bool>($"Ya existe un piso activo con el número {entity.Numero} en este hotel (RN-003).");
+
+                entity.Activar();
+                entity.UsuarioModificacion = usuarioModificacion;
+                await context.SaveChangesAsync();
+                return Success(true, "Piso activado correctamente.");
+            }
+            catch (Exception)
+            {
+                return Failure<bool>("Ocurrió un error activando el piso.");
             }
         }
 
@@ -156,15 +185,25 @@ namespace SGRH.DAL.Repositories
             if (await context.Pisos.AnyAsync(p => p.HotelId == piso.HotelId && p.Numero == piso.Numero && p.Estatus && p.Id != pisoId))
                 return $"Ya existe un piso activo con el número {piso.Numero} en este hotel (RN-003).";
 
+            // El bloque es opcional, pero si se indica debe estar activo y ser del mismo hotel.
+            if (piso.BloqueId.HasValue
+                && !await context.Bloques.AnyAsync(b => b.Id == piso.BloqueId && b.HotelId == piso.HotelId && b.Estatus))
+                return "El bloque indicado no existe, está inactivo o pertenece a otro hotel.";
+
             return null;
         }
 
-        private static PisoModel ToModel(Piso p) => new()
-        {
-            PisoId = p.Id,
-            Numero = p.Numero,
-            HotelId = p.HotelId,
-            Hotel = p.Hotel?.Nombre ?? string.Empty
-        };
+        private IQueryable<PisoModel> Consultar() =>
+            context.Pisos.Select(p => new PisoModel
+            {
+                PisoId = p.Id,
+                Numero = p.Numero,
+                HotelId = p.HotelId,
+                Hotel = p.Hotel!.Nombre,
+                BloqueId = p.BloqueId,
+                Bloque = p.Bloque != null ? p.Bloque.Nombre : null,
+                CantidadHabitaciones = p.Habitaciones.Count(h => h.Estatus),
+                Estatus = p.Estatus
+            });
     }
 }

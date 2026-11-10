@@ -1,0 +1,58 @@
+@model HotelDetalleViewModel
+@{
+    var h = Model.Hotel;
+    ViewData["Seccion"] = "Hoteles";
+    ViewData["Title"] = h.Nombre;
+    ViewData["Descripcion"] = "Estructura del hotel: bloques, pisos y habitaciones con su estado (CU-006).";
+    var grupos = Model.Pisos.GroupBy(p => p.Bloque ?? "Sin bloque").OrderBy(g => g.Key == "Sin bloque").ThenBy(g => g.Key);
+}
+<partial name="_Encabezado" />
+
+<div class="panel" style="margin-bottom:18px"><div class="panel-cuerpo">
+    <div class="datos">
+        <div class="dato"><span>Ciudad</span><b>@h.Ciudad</b></div>
+        <div class="dato"><span>Categoría</span><partial name="_Estrellas" model="h.Estrellas" /></div>
+        <div class="dato"><span>Dirección</span><b>@h.Direccion</b></div>
+        <div class="dato"><span>Contacto</span><b>@h.Telefono</b><br /><small>@h.Correo</small></div>
+        <div class="dato"><span>Estado</span><partial name="_Estatus" model="h.Estatus" /></div>
+    </div>
+    <div class="acciones" style="justify-content:flex-start; margin-top:16px">
+        <a class="btn-app btn-chico btn-secundario" asp-action="Edit" asp-route-id="@h.HotelId"><partial name="_Icono" model="@("editar")" /> Editar hotel</a>
+        <a class="btn-app btn-chico btn-secundario" asp-controller="Bloques" asp-action="Create" asp-route-hotelId="@h.HotelId"><partial name="_Icono" model="@("mas")" /> Bloque</a>
+        <a class="btn-app btn-chico btn-secundario" asp-controller="Pisos" asp-action="Create" asp-route-hotelId="@h.HotelId"><partial name="_Icono" model="@("mas")" /> Piso</a>
+        <a class="btn-app btn-chico btn-secundario" asp-controller="Habitaciones" asp-action="Create" asp-route-hotelId="@h.HotelId"><partial name="_Icono" model="@("mas")" /> Habitación</a>
+    </div>
+</div></div>
+
+<div class="panel"><div class="panel-cuerpo">
+    <h2 class="panel-titulo">Estructura</h2>
+    @if (!Model.Pisos.Any())
+    {
+        <partial name="_Vacio" model="@("Este hotel todavía no tiene pisos registrados.")" />
+    }
+    @foreach (var grupo in grupos)
+    {
+        <div class="estructura-bloque">
+            <h3><partial name="_Icono" model="@("bloque")" /> @grupo.Key</h3>
+            @foreach (var piso in grupo.OrderBy(p => p.Numero))
+            {
+                var habitaciones = Model.HabitacionesDe(piso.PisoId);
+                <div class="piso-fila">
+                    <div class="piso-etiqueta">Piso @piso.Numero</div>
+                    <div class="habitaciones">
+                        @if (!habitaciones.Any())
+                        {
+                            <span class="resumen" style="padding-top:8px">Sin habitaciones.</span>
+                        }
+                        @foreach (var hab in habitaciones)
+                        {
+                            <a class="hab @Formato.ClaseEstado(hab.Estado)" asp-controller="Habitaciones" asp-action="Details" asp-route-id="@hab.HabitacionId">
+                                <b>@hab.Numero</b>@hab.Tipo · @hab.Capacidad pers.<br />@Formato.Estado(hab.Estado)
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div></div>

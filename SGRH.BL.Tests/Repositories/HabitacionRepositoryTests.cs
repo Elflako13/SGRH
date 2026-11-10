@@ -15,7 +15,7 @@ namespace SGRH.BL.Tests.Repositories
             using var context = db.CrearContexto();
             var repo = new HabitacionRepository(context);
 
-            var resultado = await repo.AddAsync(new HabitacionAdd { Numero = "101", PisoId = datos.Piso2Id, Tipo = TipoHabitacion.Sencilla, Capacidad = 1, TarifaPorNoche = 1500m });
+            var resultado = await repo.AddAsync(new HabitacionAdd { Numero = "101", PisoId = datos.Piso2Id, TipoHabitacionId = datos.TipoSencillaId, Capacidad = 1, TarifaPorNoche = 1500m });
 
             Assert.False(resultado.Success);
             Assert.Contains("RN-005", resultado.Message);
@@ -30,7 +30,7 @@ namespace SGRH.BL.Tests.Repositories
             context.Pisos.Find(datos.Piso2Id)!.Inactivar();
             context.SaveChanges();
 
-            var resultado = await new HabitacionRepository(context).AddAsync(new HabitacionAdd { Numero = "202", PisoId = datos.Piso2Id, Tipo = TipoHabitacion.Doble, Capacidad = 2, TarifaPorNoche = 2500m });
+            var resultado = await new HabitacionRepository(context).AddAsync(new HabitacionAdd { Numero = "202", PisoId = datos.Piso2Id, TipoHabitacionId = datos.TipoDobleId, Capacidad = 2, TarifaPorNoche = 2500m });
 
             Assert.False(resultado.Success);
             Assert.Contains("RN-006", resultado.Message);
@@ -43,7 +43,7 @@ namespace SGRH.BL.Tests.Repositories
             var datos = db.Sembrar();
             using var context = db.CrearContexto();
 
-            var resultado = await new HabitacionRepository(context).AddAsync(new HabitacionAdd { Numero = "203", PisoId = datos.Piso2Id, Tipo = TipoHabitacion.Doble, Capacidad = 0, TarifaPorNoche = 2500m });
+            var resultado = await new HabitacionRepository(context).AddAsync(new HabitacionAdd { Numero = "203", PisoId = datos.Piso2Id, TipoHabitacionId = datos.TipoDobleId, Capacidad = 0, TarifaPorNoche = 2500m });
 
             Assert.False(resultado.Success);
         }
@@ -56,7 +56,7 @@ namespace SGRH.BL.Tests.Repositories
             using var context = db.CrearContexto();
             var repo = new HabitacionRepository(context);
 
-            var resultado = await repo.AddAsync(new HabitacionAdd { Numero = "202", PisoId = datos.Piso2Id, Tipo = TipoHabitacion.Doble, Capacidad = 2, TarifaPorNoche = 2700m });
+            var resultado = await repo.AddAsync(new HabitacionAdd { Numero = "202", PisoId = datos.Piso2Id, TipoHabitacionId = datos.TipoDobleId, Capacidad = 2, TarifaPorNoche = 2700m });
             var habitaciones = await repo.GetByHotelAsync(datos.HotelId);
 
             Assert.True(resultado.Success);

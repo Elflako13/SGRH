@@ -18,7 +18,9 @@ namespace SGRH.BL
             // Servicios
             services.AddScoped<ICadenaHoteleraService, CadenaHoteleraService>();
             services.AddScoped<IHotelService, HotelService>();
+            services.AddScoped<IBloqueService, BloqueService>();
             services.AddScoped<IPisoService, PisoService>();
+            services.AddScoped<ITipoHabitacionService, TipoHabitacionService>();
             services.AddScoped<IHabitacionService, HabitacionService>();
             services.AddScoped<IUsuarioService, UsuarioService>();
             services.AddScoped<IHuespedService, HuespedService>();

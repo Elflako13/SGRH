@@ -1,48 +1,69 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SGRH.Web</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] · SGRH</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/SGRH.Web.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SGRH.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
+    @{
+        var controlador = ViewContext.RouteData.Values["controller"]?.ToString();
+        string Activo(string nombre) => controlador == nombre ? "activo" : "";
+    }
+    <div class="app">
+        <aside class="sidebar">
+            <a class="brand" asp-controller="Home" asp-action="Index">
+                <span class="brand-logo">S</span>
+                <span>
+                    <span class="brand-nombre">SGRH</span><br />
+                    <span class="brand-sub">Gestión hotelera</span>
+                </span>
+            </a>
+
+            <a class="nav-link-app @Activo("Home")" asp-controller="Home" asp-action="Index"><partial name="_Icono" model="@("inicio")" /> Inicio</a>
+
+            <div class="nav-titulo">Estructura del hotel</div>
+            <a class="nav-link-app @Activo("Hoteles")" asp-controller="Hoteles" asp-action="Index"><partial name="_Icono" model="@("hotel")" /> Hoteles</a>
+            <a class="nav-link-app @Activo("Bloques")" asp-controller="Bloques" asp-action="Index"><partial name="_Icono" model="@("bloque")" /> Bloques</a>
+            <a class="nav-link-app @Activo("Pisos")" asp-controller="Pisos" asp-action="Index"><partial name="_Icono" model="@("piso")" /> Pisos</a>
+            <a class="nav-link-app @Activo("Habitaciones")" asp-controller="Habitaciones" asp-action="Index"><partial name="_Icono" model="@("habitacion")" /> Habitaciones</a>
+
+            <div class="nav-titulo">Mantenimientos</div>
+            <a class="nav-link-app @Activo("TiposHabitacion")" asp-controller="TiposHabitacion" asp-action="Index"><partial name="_Icono" model="@("tipo")" /> Tipos de habitación</a>
+
+            <div class="sidebar-card">
+                <strong>Listo para reservar</strong>
+                Hoteles, pisos, habitaciones y tipos son la base del flujo de reservas de la próxima fase.
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        </aside>
+
+        <div class="main">
+            <header class="topbar">
+                <div class="migas">
+                    <a asp-controller="Home" asp-action="Index">SGRH</a>
+                    @if (ViewData["Seccion"] is string seccion)
+                    {
+                        <span> / </span><a asp-action="Index">@seccion</a>
+                    }
+                    <span> / @ViewData["Title"]</span>
+                </div>
+                <div class="usuario-chip">
+                    <span>Administrador</span>
+                    <span class="avatar">A</span>
+                </div>
+            </header>
+
+            <main class="content">
+                <partial name="_Alertas" />
+                @RenderBody()
+            </main>
+
+            <footer class="pie">© 2026 SGRH · Sistema de Gestión de Reservas de Hoteles</footer>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - SGRH.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

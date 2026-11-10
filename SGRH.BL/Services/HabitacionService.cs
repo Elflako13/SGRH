@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SGRH.BL.Configuration;
 using SGRH.DAL.Models;
@@ -8,52 +9,83 @@ using static SGRH.DAL.Models.Result.OperationResult;
 
 namespace SGRH.BL.Services
 {
-    public class HabitacionService : IHabitacionService
+    /// <summary>Gestión de habitaciones (CU-003 a CU-005) y consulta de disponibilidad (CU-009).</summary>
+    public class HabitacionService : ServiceBase, IHabitacionService
     {
         private readonly IHabitacionRepository habitacionRepository;
         private readonly ReservaOptions reservaOptions;
 
-        public HabitacionService(IHabitacionRepository habitacionRepository, IOptions<ReservaOptions> reservaOptions)
+        public HabitacionService(IHabitacionRepository habitacionRepository, IOptions<ReservaOptions> reservaOptions, ILogger<HabitacionService> logger)
+            : base(logger)
         {
-            this.habitacionRepository = habitacionRepository;
-            this.reservaOptions = reservaOptions.Value;
+            this.habitacionRepository = habitacionRepository ?? throw new ArgumentNullException(nameof(habitacionRepository));
+            this.reservaOptions = reservaOptions?.Value ?? throw new ArgumentNullException(nameof(reservaOptions));
         }
 
-        public Task<OperationResult<List<HabitacionModel>>> GetAllAsync() => habitacionRepository.GetAllAsync();
+        public Task<OperationResult<List<HabitacionModel>>> GetAllAsync() =>
+            EjecutarAsync("consultar habitaciones", () => habitacionRepository.GetAllAsync());
 
-        public Task<OperationResult<HabitacionModel>> GetByIdAsync(int id) => habitacionRepository.GetByIdAsync(id);
+        public Task<OperationResult<HabitacionModel>> GetByIdAsync(int id) =>
+            EjecutarAsync("consultar habitación", () => ValidarId(id, "habitación"), () => habitacionRepository.GetByIdAsync(id));
 
-        public Task<OperationResult<List<HabitacionModel>>> GetByHotelAsync(int hotelId) => habitacionRepository.GetByHotelAsync(hotelId);
+        public Task<OperationResult<List<HabitacionModel>>> GetByHotelAsync(int hotelId) =>
+            EjecutarAsync("consultar habitaciones del hotel", () => ValidarId(hotelId, "hotel"), () => habitacionRepository.GetByHotelAsync(hotelId));
 
-        public Task<OperationResult<bool>> AddAsync(HabitacionAdd habitacion) => habitacionRepository.AddAsync(habitacion);
+        public Task<OperationResult<bool>> AddAsync(HabitacionAdd habitacion) =>
+            EjecutarAsync("registrar habitación",
+                          () => Requerido(habitacion, nameof(HabitacionAdd)) ?? PrimerError(
+                                    string.IsNullOrWhiteSpace(habitacion.Numero) ? "El número de habitación es obligatorio." : null,
+                                    ValidarId(habitacion.PisoId, "piso"),
+                                    ValidarHabitacion(habitacion)),
+                          () => habitacionRepository.AddAsync(habitacion), habitacion?.UsuarioCreacion);
 
-        public Task<OperationResult<bool>> UpdateAsync(HabitacionUpdate habitacion) => habitacionRepository.UpdateAsync(habitacion);
+        public Task<OperationResult<bool>> UpdateAsync(HabitacionUpdate habitacion) =>
+            EjecutarAsync("actualizar habitación",
+                          () => Requerido(habitacion, nameof(HabitacionUpdate)) ?? PrimerError(ValidarId(habitacion.Id, "habitación"), ValidarHabitacion(habitacion)),
+                          () => habitacionRepository.UpdateAsync(habitacion), habitacion?.UsuarioModificacion);
 
-        public Task<OperationResult<bool>> RemoveAsync(HabitacionRemove habitacion) => habitacionRepository.RemoveAsync(habitacion);
+        public Task<OperationResult<bool>> RemoveAsync(HabitacionRemove habitacion) =>
+            EjecutarAsync("inactivar habitación",
+                          () => Requerido(habitacion, nameof(HabitacionRemove)) ?? ValidarId(habitacion.Id, "habitación"),
+                          () => habitacionRepository.RemoveAsync(habitacion), habitacion?.UsuarioModificacion);
 
-        public Task<OperationResult<bool>> CambiarEstadoAsync(int habitacionId, EstadoHabitacion estado, int? usuarioModificacion)
-            => habitacionRepository.CambiarEstadoAsync(habitacionId, estado, usuarioModificacion);
+        /// <summary>CU-005: cambia el estado operativo (RF-007, RN-007, RN-018).</summary>
+        public Task<OperationResult<bool>> CambiarEstadoAsync(int habitacionId, EstadoHabitacion estado, int? usuarioModificacion) =>
+            EjecutarAsync("cambiar estado de habitación",
+                          () => ValidarId(habitacionId, "habitación") ?? (Enum.IsDefined(estado) ? null : "El estado indicado no es válido."),
+                          () => habitacionRepository.CambiarEstadoAsync(habitacionId, estado, usuarioModificacion), usuarioModificacion);
 
         /// <summary>
         /// CU-009: consulta de disponibilidad. Antes de ir a la base de datos aplica las reglas
         /// de la solicitud (RN-009, RN-011 y los límites de ReservaOptions) y devuelve las
         /// habitaciones ordenadas de la más económica a la más cara.
         /// </summary>
-        public async Task<OperationResult<List<HabitacionDisponibleModel>>> GetDisponiblesAsync(int hotelId, DateOnly entrada, DateOnly salida, int cantidadHuespedes)
+        public Task<OperationResult<List<HabitacionDisponibleModel>>> GetDisponiblesAsync(int hotelId, DateOnly entrada, DateOnly salida, int cantidadHuespedes) =>
+            EjecutarAsync("consultar disponibilidad", () => ValidarSolicitud(entrada, salida, cantidadHuespedes), async () =>
+            {
+                var resultado = await habitacionRepository.GetDisponiblesAsync(hotelId, entrada, salida, cantidadHuespedes);
+                if (!resultado.Success)
+                    return resultado;
+
+                var ordenadas = resultado.Data!.OrderBy(h => h.CostoEstimado).ThenBy(h => h.Numero).ToList();
+
+                return ordenadas.Count == 0
+                    ? Success(ordenadas, "No hay habitaciones disponibles para esas fechas. Pruebe con otras fechas o con menos huéspedes.")
+                    : Success(ordenadas, $"Se encontraron {ordenadas.Count} habitación(es) disponible(s).");
+            });
+
+        private static string? ValidarHabitacion(HabitacionBase habitacion)
         {
-            var validation = ValidarSolicitud(entrada, salida, cantidadHuespedes);
-            if (validation is not null)
-                return Failure<List<HabitacionDisponibleModel>>(validation);
+            if (habitacion.TipoHabitacionId <= 0)
+                return "Debe seleccionar el tipo de habitación.";
 
-            var resultado = await habitacionRepository.GetDisponiblesAsync(hotelId, entrada, salida, cantidadHuespedes);
-            if (!resultado.Success)
-                return resultado;
+            if (habitacion.Capacidad <= 0)
+                return "La capacidad debe ser mayor que cero.";
 
-            var ordenadas = resultado.Data!.OrderBy(h => h.CostoEstimado).ThenBy(h => h.Numero).ToList();
+            if (habitacion.TarifaPorNoche <= 0)
+                return "La tarifa por noche debe ser mayor que cero.";
 
-            return ordenadas.Count == 0
-                ? Success(ordenadas, "No hay habitaciones disponibles para esas fechas. Pruebe con otras fechas o con menos huéspedes.")
-                : Success(ordenadas, $"Se encontraron {ordenadas.Count} habitación(es) disponible(s).");
+            return null;
         }
 
         private string? ValidarSolicitud(DateOnly entrada, DateOnly salida, int cantidadHuespedes)

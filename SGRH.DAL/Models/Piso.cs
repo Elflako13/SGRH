@@ -11,6 +11,10 @@ namespace SGRH.DAL.Models
         public int HotelId { get; set; }
         public Hotel? Hotel { get; set; }
 
+        // Bloque (torre o edificio) del hotel donde está el piso. Es opcional.
+        public int? BloqueId { get; set; }
+        public Bloque? Bloque { get; set; }
+
         public List<Habitacion> Habitaciones { get; set; } = new();
 
         /// <summary>RN-004, RN-005 y RN-006.</summary>

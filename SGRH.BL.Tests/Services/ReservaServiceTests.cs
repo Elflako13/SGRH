@@ -16,7 +16,8 @@ namespace SGRH.BL.Tests.Services
                                   new HistorialReservaRepository(context),
                                   new NotificacionRepository(context),
                                   Opciones.Reserva(maximoNoches),
-                                  Opciones.Notificacion());
+                                  Opciones.Notificacion(),
+                                  Log.De<ReservaService>());
 
         private static ReservaAdd Nueva(DatosDePrueba datos, int desde, int hasta, int? usuarioId = null) => new()
         {

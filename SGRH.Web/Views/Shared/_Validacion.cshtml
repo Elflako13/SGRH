@@ -1,0 +1,7 @@
+@* Mensajes de validación del formulario y de las reglas de negocio que devuelve la capa BL. *@
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alerta alerta-error" role="alert">
+        <div asp-validation-summary="All"></div>
+    </div>
+}

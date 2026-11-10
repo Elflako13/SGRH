@@ -10,20 +10,27 @@ namespace SGRH.DAL.Models
         {
         }
 
-        public Habitacion(string numero, TipoHabitacion tipo, int capacidad, decimal tarifaPorNoche)
+        public Habitacion(string numero, int tipoHabitacionId, int capacidad, decimal tarifaPorNoche)
         {
             if (string.IsNullOrWhiteSpace(numero))
                 throw new ReglaNegocioException("El número de habitación es obligatorio.");
 
             Numero = numero.Trim();
-            Tipo = tipo;
+            TipoHabitacionId = tipoHabitacionId;
             CambiarCapacidad(capacidad);
             ActualizarTarifa(tarifaPorNoche);
             Estado = EstadoHabitacion.Disponible;
         }
 
+        public Habitacion(string numero, TipoHabitacion tipo, int capacidad, decimal tarifaPorNoche)
+            : this(numero, tipo.Id, capacidad, tarifaPorNoche)
+        {
+            TipoHabitacion = tipo;
+        }
+
         public string Numero { get; private set; } = string.Empty;
-        public TipoHabitacion Tipo { get; set; }
+        public int TipoHabitacionId { get; set; }
+        public TipoHabitacion? TipoHabitacion { get; set; }
         public int Capacidad { get; private set; }
         public decimal TarifaPorNoche { get; private set; }
         public EstadoHabitacion Estado { get; private set; }

@@ -1,0 +1,43 @@
+@model ListadoViewModel<TipoHabitacionModel, FiltroBase>
+@{
+    ViewData["Title"] = "Tipos de habitación";
+    ViewData["Descripcion"] = "Catálogo de tipos que se asignan a las habitaciones, con su tarifa base sugerida.";
+    ViewData["NuevoTexto"] = "Nuevo tipo";
+}
+<partial name="_Encabezado" />
+
+<form method="get" class="panel filtros">
+    <partial name="_FiltroComun" model="Model.Filtro" />
+</form>
+
+<partial name="_Resumen" model='(Model.Items.Count, Model.Total, "tipos")' />
+
+<div class="panel tabla-contenedor">
+    @if (Model.Items.Count == 0)
+    {
+        <partial name="_Vacio" model="@("No hay tipos de habitación que coincidan con el filtro.")" />
+    }
+    else
+    {
+        <table class="tabla">
+            <thead><tr><th>Tipo</th><th>Tarifa base</th><th>Habitaciones activas</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var t in Model.Items)
+                {
+                    <tr>
+                        <td><b>@t.Nombre</b><span class="sub">@t.Descripcion</span></td>
+                        <td>@Formato.Moneda(t.TarifaBase)</td>
+                        <td>@t.CantidadHabitaciones</td>
+                        <td><partial name="_Estatus" model="t.Estatus" /></td>
+                        <td>
+                            <div class="acciones">
+                                <a class="btn-app btn-chico btn-secundario" asp-action="Edit" asp-route-id="@t.TipoHabitacionId"><partial name="_Icono" model="@("editar")" /> Editar</a>
+                                <partial name="_AccionesEstatus" model="(t.TipoHabitacionId, t.Estatus)" />
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
