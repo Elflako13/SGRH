@@ -1,0 +1,83 @@
+@model HabitacionViewModel
+@{
+    ViewData["Seccion"] = "Habitaciones";
+    ViewData["Title"] = Model.EsNuevo ? "Nueva habitación" : $"Editar habitación {Model.Numero}";
+    ViewData["Descripcion"] = Model.EsNuevo
+        ? "Se registra en un piso activo; el número no se repite dentro del hotel (RN-004 a RN-006)."
+        : "Se puede cambiar el tipo, la capacidad y la tarifa (CU-004).";
+    var tipos = (List<TipoHabitacionModel>)ViewBag.Tipos;
+}
+<partial name="_Encabezado" />
+
+<div class="panel form-contenedor">
+    <form method="post" asp-action="@(Model.EsNuevo ? "Create" : "Edit")" asp-route-id="@(Model.EsNuevo ? null : Model.Id)" class="panel-cuerpo">
+        <partial name="_Validacion" />
+        <div class="form-grid">
+            @if (Model.EsNuevo)
+            {
+                <div class="form-campo">
+                    <label asp-for="HotelId"></label>
+                    <select class="control" asp-for="HotelId" asp-items="ViewBag.Hoteles"><option value="0">Seleccione un hotel</option></select>
+                    <span asp-validation-for="HotelId"></span>
+                </div>
+                <div class="form-campo">
+                    <label asp-for="PisoId"></label>
+                    <select class="control" asp-for="PisoId" asp-items="ViewBag.Pisos"
+                            data-depende-de="HotelId" data-url="@Url.Action("PorHotel", "Pisos")" data-vacio-valor="0">
+                        <option value="0">Seleccione un piso</option>
+                    </select>
+                    <span asp-validation-for="PisoId"></span>
+                </div>
+                <div class="form-campo">
+                    <label asp-for="Numero"></label>
+                    <input class="control" asp-for="Numero" placeholder="Ej.: 305" />
+                    <span asp-validation-for="Numero"></span>
+                </div>
+            }
+            else
+            {
+                <div class="form-campo">
+                    <label asp-for="HotelId"></label>
+                    <select class="control" asp-items="ViewBag.Hoteles" disabled></select>
+                </div>
+                <div class="form-campo">
+                    <label asp-for="PisoId"></label>
+                    <select class="control" asp-items="ViewBag.Pisos" disabled></select>
+                </div>
+                <div class="form-campo">
+                    <label asp-for="Numero"></label>
+                    <input class="control" value="@Model.Numero" readonly />
+                    <div class="form-ayuda">El hotel, el piso y el número no se cambian aquí.</div>
+                </div>
+                <input type="hidden" asp-for="HotelId" />
+                <input type="hidden" asp-for="PisoId" />
+                <input type="hidden" asp-for="Numero" />
+            }
+            <div class="form-campo">
+                <label asp-for="TipoHabitacionId"></label>
+                <select class="control" asp-for="TipoHabitacionId" data-tarifa-destino="TarifaPorNoche">
+                    <option value="0">Seleccione un tipo</option>
+                    @foreach (var t in tipos)
+                    {
+                        <option value="@t.TipoHabitacionId" data-tarifa="@t.TarifaBase.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)">@t.Nombre</option>
+                    }
+                </select>
+                <span asp-validation-for="TipoHabitacionId"></span>
+            </div>
+            <div class="form-campo">
+                <label asp-for="Capacidad"></label>
+                <input class="control" asp-for="Capacidad" type="number" min="1" />
+                <span asp-validation-for="Capacidad"></span>
+            </div>
+            <div class="form-campo">
+                <label asp-for="TarifaPorNoche"></label>
+                <input class="control" asp-for="TarifaPorNoche" type="number" step="0.01" min="1" />
+                <span asp-validation-for="TarifaPorNoche"></span>
+                <div class="form-ayuda">Al elegir el tipo se propone su tarifa base; puede cambiarla.</div>
+            </div>
+        </div>
+        <partial name="_FormPie" />
+    </form>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -1,0 +1,49 @@
+@model ListadoViewModel<BloqueModel, HotelHijoFiltro>
+@{
+    ViewData["Title"] = "Bloques";
+    ViewData["Descripcion"] = "Torres, edificios o alas de cada hotel. Sirven para agrupar los pisos.";
+    ViewData["NuevoTexto"] = "Nuevo bloque";
+}
+<partial name="_Encabezado" />
+
+<form method="get" class="panel filtros">
+    <div class="campo">
+        <label for="HotelId">Hotel</label>
+        <select class="control" id="HotelId" name="HotelId" asp-items="ViewBag.Hoteles" data-autoenviar>
+            <option value="">Todos los hoteles</option>
+        </select>
+    </div>
+    <partial name="_FiltroComun" model="Model.Filtro" />
+</form>
+
+<partial name="_Resumen" model='(Model.Items.Count, Model.Total, "bloques")' />
+
+<div class="panel tabla-contenedor">
+    @if (Model.Items.Count == 0)
+    {
+        <partial name="_Vacio" model="@("No hay bloques que coincidan con el filtro.")" />
+    }
+    else
+    {
+        <table class="tabla">
+            <thead><tr><th>Bloque</th><th>Hotel</th><th>Pisos activos</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var b in Model.Items)
+                {
+                    <tr>
+                        <td><b>@b.Nombre</b><span class="sub">@b.Descripcion</span></td>
+                        <td><a asp-controller="Hoteles" asp-action="Details" asp-route-id="@b.HotelId">@b.Hotel</a></td>
+                        <td>@b.CantidadPisos</td>
+                        <td><partial name="_Estatus" model="b.Estatus" /></td>
+                        <td>
+                            <div class="acciones">
+                                <a class="btn-app btn-chico btn-secundario" asp-action="Edit" asp-route-id="@b.BloqueId"><partial name="_Icono" model="@("editar")" /> Editar</a>
+                                <partial name="_AccionesEstatus" model="(b.BloqueId, b.Estatus)" />
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

@@ -1,0 +1,14 @@
+@* Encabezado de las páginas: título, descripción y botón para crear (si la página lo indica). *@
+<div class="encabezado">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        @if (ViewData["Descripcion"] is string descripcion)
+        {
+            <p>@descripcion</p>
+        }
+    </div>
+    @if (ViewData["NuevoTexto"] is string nuevo)
+    {
+        <a class="btn-app btn-primario" href="@(ViewData["NuevoUrl"] ?? Url.Action("Create"))"><partial name="_Icono" model="@("mas")" /> @nuevo</a>
+    }
+</div>

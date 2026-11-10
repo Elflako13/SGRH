@@ -1,0 +1,70 @@
+@model ListadoViewModel<HabitacionModel, HabitacionFiltro>
+@{
+    ViewData["Title"] = "Habitaciones";
+    ViewData["Descripcion"] = "Habitaciones de cada piso con su tipo, capacidad, tarifa y estado operativo.";
+    ViewData["NuevoTexto"] = "Nueva habitación";
+}
+<partial name="_Encabezado" />
+
+<form method="get" class="panel filtros">
+    <div class="campo">
+        <label for="HotelId">Hotel</label>
+        <select class="control" id="HotelId" name="HotelId" asp-items="ViewBag.Hoteles" data-autoenviar>
+            <option value="">Todos los hoteles</option>
+        </select>
+    </div>
+    <div class="campo">
+        <label for="PisoId">Piso</label>
+        <select class="control" id="PisoId" name="PisoId" asp-items="ViewBag.Pisos" data-autoenviar>
+            <option value="">@(Model.Filtro.HotelId is null ? "Seleccione un hotel" : "Todos los pisos")</option>
+        </select>
+    </div>
+    <div class="campo">
+        <label for="TipoHabitacionId">Tipo</label>
+        <select class="control" id="TipoHabitacionId" name="TipoHabitacionId" asp-items="ViewBag.Tipos" data-autoenviar>
+            <option value="">Todos los tipos</option>
+        </select>
+    </div>
+    <div class="campo">
+        <label for="EstadoOperativo">Estado operativo</label>
+        <select class="control" id="EstadoOperativo" name="EstadoOperativo" asp-items="ViewBag.Estados" data-autoenviar>
+            <option value="">Todos</option>
+        </select>
+    </div>
+    <partial name="_FiltroComun" model="Model.Filtro" />
+</form>
+
+<partial name="_Resumen" model='(Model.Items.Count, Model.Total, "habitaciones")' />
+
+<div class="panel tabla-contenedor">
+    @if (Model.Items.Count == 0)
+    {
+        <partial name="_Vacio" model="@("No hay habitaciones que coincidan con el filtro.")" />
+    }
+    else
+    {
+        <table class="tabla">
+            <thead><tr><th>Habitación</th><th>Hotel / ubicación</th><th>Tipo</th><th>Capacidad</th><th>Tarifa por noche</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var h in Model.Items)
+                {
+                    <tr>
+                        <td><b>@h.Numero</b></td>
+                        <td>@h.Hotel<span class="sub">Piso @h.NumeroPiso@(h.Bloque is null ? "" : $" · {h.Bloque}")</span></td>
+                        <td>@h.Tipo</td>
+                        <td>@h.Capacidad pers.</td>
+                        <td>@Formato.Moneda(h.TarifaPorNoche)</td>
+                        <td><partial name="_EstadoHabitacion" model="h.Estado" /></td>
+                        <td>
+                            <div class="acciones">
+                                <a class="btn-app btn-chico btn-secundario" asp-action="Details" asp-route-id="@h.HabitacionId"><partial name="_Icono" model="@("ver")" /> Ver</a>
+                                <a class="btn-app btn-chico btn-secundario" asp-action="Edit" asp-route-id="@h.HabitacionId"><partial name="_Icono" model="@("editar")" /> Editar</a>
+                                <partial name="_AccionesEstatus" model="(h.HabitacionId, h.Estatus)" />
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

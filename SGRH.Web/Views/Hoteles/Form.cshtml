@@ -1,0 +1,53 @@
+@model HotelViewModel
+@{
+    ViewData["Seccion"] = "Hoteles";
+    ViewData["Title"] = Model.EsNuevo ? "Nuevo hotel" : "Editar hotel";
+    ViewData["Descripcion"] = "Datos generales del hotel (CU-001).";
+}
+<partial name="_Encabezado" />
+
+<div class="panel form-contenedor">
+    <form method="post" asp-action="@(Model.EsNuevo ? "Create" : "Edit")" asp-route-id="@(Model.EsNuevo ? null : Model.Id)" class="panel-cuerpo">
+        <partial name="_Validacion" />
+        <div class="form-grid">
+            <div class="form-campo ancho">
+                <label asp-for="Nombre"></label>
+                <input class="control" asp-for="Nombre" placeholder="Ej.: Hotel Caribe Santo Domingo" />
+                <span asp-validation-for="Nombre"></span>
+            </div>
+            <div class="form-campo">
+                <label asp-for="Ciudad"></label>
+                <input class="control" asp-for="Ciudad" placeholder="Ej.: Santo Domingo" />
+                <span asp-validation-for="Ciudad"></span>
+            </div>
+            <div class="form-campo">
+                <label asp-for="Estrellas"></label>
+                <select class="control" asp-for="Estrellas">
+                    @for (int e = 1; e <= 5; e++)
+                    {
+                        <option value="@e">@e @(e == 1 ? "estrella" : "estrellas")</option>
+                    }
+                </select>
+                <span asp-validation-for="Estrellas"></span>
+            </div>
+            <div class="form-campo ancho">
+                <label asp-for="Direccion"></label>
+                <input class="control" asp-for="Direccion" />
+                <span asp-validation-for="Direccion"></span>
+            </div>
+            <div class="form-campo">
+                <label asp-for="Telefono"></label>
+                <input class="control" asp-for="Telefono" placeholder="809-555-0000" />
+                <span asp-validation-for="Telefono"></span>
+            </div>
+            <div class="form-campo">
+                <label asp-for="Correo"></label>
+                <input class="control" asp-for="Correo" placeholder="reservas@hotel.com" />
+                <span asp-validation-for="Correo"></span>
+            </div>
+        </div>
+        <partial name="_FormPie" />
+    </form>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -1,0 +1,39 @@
+@model HabitacionModel
+@{
+    ViewData["Seccion"] = "Habitaciones";
+    ViewData["Title"] = $"Habitación {Model.Numero}";
+    ViewData["Descripcion"] = $"{Model.Hotel} · Piso {Model.NumeroPiso}{(Model.Bloque is null ? "" : $" · {Model.Bloque}")}";
+}
+<partial name="_Encabezado" />
+
+<div class="dos-columnas">
+    <div class="panel"><div class="panel-cuerpo">
+        <h2 class="panel-titulo">Datos de la habitación</h2>
+        <div class="datos">
+            <div class="dato"><span>Tipo</span><b>@Model.Tipo</b></div>
+            <div class="dato"><span>Capacidad</span><b>@Model.Capacidad personas</b></div>
+            <div class="dato"><span>Tarifa por noche</span><b>@Formato.Moneda(Model.TarifaPorNoche)</b></div>
+            <div class="dato"><span>Estado operativo</span><partial name="_EstadoHabitacion" model="Model.Estado" /></div>
+            <div class="dato"><span>Registro</span><partial name="_Estatus" model="Model.Estatus" /></div>
+        </div>
+        <div class="acciones" style="justify-content:flex-start; margin-top:18px">
+            <a class="btn-app btn-chico btn-secundario" asp-action="Edit" asp-route-id="@Model.HabitacionId"><partial name="_Icono" model="@("editar")" /> Editar</a>
+            <a class="btn-app btn-chico btn-secundario" asp-controller="Hoteles" asp-action="Details" asp-route-id="@Model.HotelId"><partial name="_Icono" model="@("hotel")" /> Ver estructura del hotel</a>
+        </div>
+    </div></div>
+
+    <div class="panel"><div class="panel-cuerpo">
+        <h2 class="panel-titulo">Cambiar estado operativo (CU-005)</h2>
+        <p class="resumen">Una habitación en mantenimiento, fuera de servicio o inactiva no se puede reservar (RN-007). Si tiene reservas activas futuras, primero hay que reubicarlas o cancelarlas (RN-018).</p>
+        <form method="post" asp-action="CambiarEstado" asp-route-id="@Model.HabitacionId">
+            <input type="hidden" name="volverA" value="@Context.Request.Path" />
+            <div class="form-campo">
+                <label for="estado">Nuevo estado</label>
+                <select class="control" id="estado" name="estado" asp-items="ViewBag.Estados"></select>
+            </div>
+            <div class="form-pie">
+                <button type="submit" class="btn-app btn-primario">Cambiar estado</button>
+            </div>
+        </form>
+    </div></div>
+</div>
