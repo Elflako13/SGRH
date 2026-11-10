@@ -39,7 +39,7 @@ namespace SGRH.BL.Services
                     logger.LogInformation("Operación de {Operacion} completada. Usuario: {UsuarioId}, Fecha: {Fecha}, TraceId: {TraceId}",
                                           operacion, usuarioId, DateTime.Now, traceId);
                 else
-                    logger.LogWarning("Operación de {Operacion} no completada: {Mensaje}. Usuario: {UsuarioId}, TraceId: {TraceId}",
+                    logger.LogWarning("Operación de {Operacion} no completada: {Mensaje} (Usuario: {UsuarioId}, TraceId: {TraceId})",
                                       operacion, result.Message, usuarioId, traceId);
 
                 return result;
