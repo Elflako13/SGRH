@@ -42,28 +42,7 @@ else
     <div class="grid-hoteles">
         @foreach (var h in Model.Items)
         {
-            <div class="panel hotel-card">
-                <div class="hotel-portada @(h.Estrellas >= 5 ? "v2" : h.Estrellas <= 3 ? "v3" : "")">
-                    <partial name="_Estatus" model="h.Estatus" />
-                    <partial name="_Icono" model="@("hotel")" />
-                </div>
-                <div class="panel-cuerpo">
-                    <span class="hotel-ciudad">@h.Ciudad</span>
-                    <h2 class="hotel-nombre">@h.Nombre</h2>
-                    <partial name="_Estrellas" model="h.Estrellas" />
-                    <p class="hotel-dir">@h.Direccion · @h.Telefono</p>
-                    <div class="hotel-datos">
-                        <span><b>@h.CantidadBloques</b> bloques</span>
-                        <span><b>@h.CantidadPisos</b> pisos</span>
-                        <span><b>@h.CantidadHabitaciones</b> habitaciones</span>
-                    </div>
-                    <div class="acciones">
-                        <a class="btn-app btn-chico btn-secundario" asp-action="Details" asp-route-id="@h.HotelId"><partial name="_Icono" model="@("ver")" /> Estructura</a>
-                        <a class="btn-app btn-chico btn-secundario" asp-action="Edit" asp-route-id="@h.HotelId"><partial name="_Icono" model="@("editar")" /> Editar</a>
-                        <partial name="_AccionesEstatus" model="(h.HotelId, h.Estatus)" />
-                    </div>
-                </div>
-            </div>
+            <partial name="_TarjetaHotel" model="h" />
         }
     </div>
 }
