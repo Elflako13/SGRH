@@ -2,16 +2,14 @@
 @{
     ViewData["Title"] = "Inicio";
     int maximo = Math.Max(1, Model.HabitacionesPorEstado.Values.DefaultIfEmpty(0).Max());
-    string[] portadas = ["", "v2", "v3"];
 }
-<section class="hero">
+<section class="bienvenida">
     <div>
-        <small>Sistema de Gestión de Reservas de Hoteles</small>
-        <h1>Toda la estructura de tus hoteles,<br /><span>en un solo lugar.</span></h1>
-        <p>Administra hoteles, bloques, pisos, habitaciones y tipos de habitación. Esta es la base que necesita el flujo de reservas.</p>
-        <a class="btn-app btn-primario" asp-controller="Hoteles" asp-action="Index"><partial name="_Icono" model="@("hotel")" /> Ver hoteles</a>
+        <span class="fecha">@{ var hoy = DateTime.Today.ToString("dddd, d 'de' MMMM 'de' yyyy"); }@(char.ToUpper(hoy[0]) + hoy[1..])</span>
+        <h1>Panel de la cadena hotelera</h1>
+        <p>Resumen de hoteles, bloques, pisos, habitaciones y tipos registrados en el sistema.</p>
     </div>
-    <div class="hero-ilustracion"><partial name="_Icono" model="@("hotel")" /></div>
+    <a class="btn-app btn-dorado" asp-controller="Habitaciones" asp-action="Index"><partial name="_Icono" model="@("habitacion")" /> Ver habitaciones</a>
 </section>
 
 <div class="stats">
@@ -26,18 +24,9 @@
     <div>
         <h2 class="panel-titulo">Hoteles de la cadena</h2>
         <div class="grid-hoteles">
-            @for (int i = 0; i < Model.HotelesDestacados.Count; i++)
+            @foreach (var h in Model.HotelesDestacados)
             {
-                var h = Model.HotelesDestacados[i];
-                <a class="panel hotel-card" asp-controller="Hoteles" asp-action="Details" asp-route-id="@h.HotelId">
-                    <div class="hotel-portada @portadas[i % 3]"><partial name="_Icono" model="@("hotel")" /></div>
-                    <div class="panel-cuerpo">
-                        <span class="hotel-ciudad">@h.Ciudad</span>
-                        <span class="hotel-nombre" style="color:var(--texto)">@h.Nombre</span>
-                        <partial name="_Estrellas" model="h.Estrellas" />
-                        <div class="hotel-datos"><span><b>@h.CantidadPisos</b> pisos</span><span><b>@h.CantidadHabitaciones</b> habitaciones</span></div>
-                    </div>
-                </a>
+                <partial name="_TarjetaHotel" model="h" />
             }
         </div>
     </div>

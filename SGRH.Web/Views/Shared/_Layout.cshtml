@@ -12,55 +12,48 @@
         string Activo(string nombre) => controlador == nombre ? "activo" : "";
     }
     <div class="app">
-        <aside class="sidebar">
-            <a class="brand" asp-controller="Home" asp-action="Index">
-                <span class="brand-logo">S</span>
-                <span>
-                    <span class="brand-nombre">SGRH</span><br />
-                    <span class="brand-sub">Gestión hotelera</span>
-                </span>
-            </a>
+        <header class="barra-superior">
+            <div class="barra-interior">
+                <a class="brand" asp-controller="Home" asp-action="Index">
+                    <span class="brand-logo">H</span>
+                    <span class="brand-nombre">SGRH <span class="brand-sub">· Reservas de Hoteles</span></span>
+                </a>
 
-            <a class="nav-link-app @Activo("Home")" asp-controller="Home" asp-action="Index"><partial name="_Icono" model="@("inicio")" /> Inicio</a>
+                <nav class="menu">
+                    <a class="@Activo("Home")" asp-controller="Home" asp-action="Index"><partial name="_Icono" model="@("inicio")" /> Inicio</a>
+                    <a class="@Activo("Hoteles")" asp-controller="Hoteles" asp-action="Index"><partial name="_Icono" model="@("hotel")" /> Hoteles</a>
+                    <a class="@Activo("Bloques")" asp-controller="Bloques" asp-action="Index"><partial name="_Icono" model="@("bloque")" /> Bloques</a>
+                    <a class="@Activo("Pisos")" asp-controller="Pisos" asp-action="Index"><partial name="_Icono" model="@("piso")" /> Pisos</a>
+                    <a class="@Activo("Habitaciones")" asp-controller="Habitaciones" asp-action="Index"><partial name="_Icono" model="@("habitacion")" /> Habitaciones</a>
+                    <a class="@Activo("TiposHabitacion")" asp-controller="TiposHabitacion" asp-action="Index"><partial name="_Icono" model="@("tipo")" /> Tipos de habitación</a>
+                </nav>
 
-            <div class="nav-titulo">Estructura del hotel</div>
-            <a class="nav-link-app @Activo("Hoteles")" asp-controller="Hoteles" asp-action="Index"><partial name="_Icono" model="@("hotel")" /> Hoteles</a>
-            <a class="nav-link-app @Activo("Bloques")" asp-controller="Bloques" asp-action="Index"><partial name="_Icono" model="@("bloque")" /> Bloques</a>
-            <a class="nav-link-app @Activo("Pisos")" asp-controller="Pisos" asp-action="Index"><partial name="_Icono" model="@("piso")" /> Pisos</a>
-            <a class="nav-link-app @Activo("Habitaciones")" asp-controller="Habitaciones" asp-action="Index"><partial name="_Icono" model="@("habitacion")" /> Habitaciones</a>
-
-            <div class="nav-titulo">Mantenimientos</div>
-            <a class="nav-link-app @Activo("TiposHabitacion")" asp-controller="TiposHabitacion" asp-action="Index"><partial name="_Icono" model="@("tipo")" /> Tipos de habitación</a>
-
-            <div class="sidebar-card">
-                <strong>Listo para reservar</strong>
-                Hoteles, pisos, habitaciones y tipos son la base del flujo de reservas de la próxima fase.
-            </div>
-        </aside>
-
-        <div class="main">
-            <header class="topbar">
-                <div class="migas">
-                    <a asp-controller="Home" asp-action="Index">SGRH</a>
-                    @if (ViewData["Seccion"] is string seccion)
-                    {
-                        <span> / </span><a asp-action="Index">@seccion</a>
-                    }
-                    <span> / @ViewData["Title"]</span>
-                </div>
                 <div class="usuario-chip">
                     <span>Administrador</span>
                     <span class="avatar">A</span>
                 </div>
-            </header>
+            </div>
+        </header>
 
+        <div class="main">
             <main class="content">
+                <div class="migas">
+                    <a asp-controller="Home" asp-action="Index">Inicio</a>
+                    @if (ViewData["Seccion"] is string seccion)
+                    {
+                        <span> › </span><a asp-action="Index">@seccion</a>
+                    }
+                    @if (controlador != "Home")
+                    {
+                        <span> › @ViewData["Title"]</span>
+                    }
+                </div>
                 <partial name="_Alertas" />
                 @RenderBody()
             </main>
-
-            <footer class="pie">© 2026 SGRH · Sistema de Gestión de Reservas de Hoteles</footer>
         </div>
+
+        <footer class="pie">SGRH · Sistema de Gestión de Reservas de Hoteles · 2026</footer>
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
