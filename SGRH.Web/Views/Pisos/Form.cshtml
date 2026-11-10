@@ -1,0 +1,45 @@
+@model PisoViewModel
+@{
+    ViewData["Seccion"] = "Pisos";
+    ViewData["Title"] = Model.EsNuevo ? "Nuevo piso" : "Editar piso";
+    ViewData["Descripcion"] = "Un piso pertenece a un solo hotel (RN-002). El bloque es opcional.";
+}
+<partial name="_Encabezado" />
+
+<div class="panel form-contenedor">
+    <form method="post" asp-action="@(Model.EsNuevo ? "Create" : "Edit")" asp-route-id="@(Model.EsNuevo ? null : Model.Id)" class="panel-cuerpo">
+        <partial name="_Validacion" />
+        <div class="form-grid">
+            <div class="form-campo">
+                <label asp-for="HotelId"></label>
+                @if (Model.EsNuevo)
+                {
+                    <select class="control" asp-for="HotelId" asp-items="ViewBag.Hoteles"><option value="0">Seleccione un hotel</option></select>
+                }
+                else
+                {
+                    <select class="control" asp-items="ViewBag.Hoteles" disabled></select>
+                    <input type="hidden" asp-for="HotelId" />
+                    <div class="form-ayuda">El piso no puede trasladarse a otro hotel (RN-002).</div>
+                }
+                <span asp-validation-for="HotelId"></span>
+            </div>
+            <div class="form-campo">
+                <label asp-for="Numero"></label>
+                <input class="control" asp-for="Numero" type="number" min="1" />
+                <span asp-validation-for="Numero"></span>
+            </div>
+            <div class="form-campo">
+                <label asp-for="BloqueId"></label>
+                <select class="control" asp-for="BloqueId" asp-items="ViewBag.Bloques"
+                        data-depende-de="HotelId" data-url="@Url.Action("PorHotel", "Bloques")">
+                    <option value="">Sin bloque</option>
+                </select>
+                <div class="form-ayuda">Solo aparecen los bloques activos del hotel seleccionado.</div>
+            </div>
+        </div>
+        <partial name="_FormPie" />
+    </form>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

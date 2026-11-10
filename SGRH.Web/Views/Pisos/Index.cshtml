@@ -1,0 +1,56 @@
+@model ListadoViewModel<PisoModel, PisoFiltro>
+@{
+    ViewData["Title"] = "Pisos";
+    ViewData["Descripcion"] = "Pisos de cada hotel (CU-002). No puede haber dos pisos activos con el mismo número en un hotel (RN-003).";
+    ViewData["NuevoTexto"] = "Nuevo piso";
+}
+<partial name="_Encabezado" />
+
+<form method="get" class="panel filtros">
+    <div class="campo">
+        <label for="HotelId">Hotel</label>
+        <select class="control" id="HotelId" name="HotelId" asp-items="ViewBag.Hoteles" data-autoenviar>
+            <option value="">Todos los hoteles</option>
+        </select>
+    </div>
+    <div class="campo">
+        <label for="BloqueId">Bloque</label>
+        <select class="control" id="BloqueId" name="BloqueId" asp-items="ViewBag.Bloques" data-autoenviar>
+            <option value="">@(Model.Filtro.HotelId is null ? "Seleccione un hotel" : "Todos los bloques")</option>
+        </select>
+    </div>
+    <partial name="_FiltroComun" model="Model.Filtro" />
+</form>
+
+<partial name="_Resumen" model='(Model.Items.Count, Model.Total, "pisos")' />
+
+<div class="panel tabla-contenedor">
+    @if (Model.Items.Count == 0)
+    {
+        <partial name="_Vacio" model="@("No hay pisos que coincidan con el filtro.")" />
+    }
+    else
+    {
+        <table class="tabla">
+            <thead><tr><th>Piso</th><th>Hotel</th><th>Bloque</th><th>Habitaciones</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var p in Model.Items)
+                {
+                    <tr>
+                        <td><b>Piso @p.Numero</b></td>
+                        <td><a asp-controller="Hoteles" asp-action="Details" asp-route-id="@p.HotelId">@p.Hotel</a></td>
+                        <td>@(p.Bloque ?? "—")</td>
+                        <td>@p.CantidadHabitaciones</td>
+                        <td><partial name="_Estatus" model="p.Estatus" /></td>
+                        <td>
+                            <div class="acciones">
+                                <a class="btn-app btn-chico btn-secundario" asp-action="Edit" asp-route-id="@p.PisoId"><partial name="_Icono" model="@("editar")" /> Editar</a>
+                                <partial name="_AccionesEstatus" model="(p.PisoId, p.Estatus)" />
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
