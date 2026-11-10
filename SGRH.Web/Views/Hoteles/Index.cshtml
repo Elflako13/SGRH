@@ -1,0 +1,69 @@
+@model ListadoViewModel<HotelModel, HotelFiltro>
+@{
+    ViewData["Title"] = "Hoteles";
+    ViewData["Descripcion"] = "Hoteles de la cadena con su categoría, ubicación y estructura.";
+    ViewData["NuevoTexto"] = "Nuevo hotel";
+    var f = Model.Filtro;
+    string UrlEstrellas(int? e) => Url.Action("Index", new { f.Buscar, f.Ciudad, Estrellas = e, f.Estado })!;
+}
+<partial name="_Encabezado" />
+
+<div class="chips">
+    <a class="chip @(f.Estrellas is null ? "activo" : "")" href="@UrlEstrellas(null)">Todas las categorías</a>
+    @for (int e = 5; e >= 1; e--)
+    {
+        <a class="chip @(f.Estrellas == e ? "activo" : "")" href="@UrlEstrellas(e)">@e ★</a>
+    }
+</div>
+
+<form method="get" class="panel filtros">
+    <input type="hidden" name="Estrellas" value="@f.Estrellas" />
+    <div class="campo">
+        <label for="Ciudad">Ciudad</label>
+        <select class="control" id="Ciudad" name="Ciudad" data-autoenviar>
+            <option value="">Todas las ciudades</option>
+            @foreach (var ciudad in (List<string>)ViewBag.Ciudades)
+            {
+                <option value="@ciudad" selected="@(f.Ciudad == ciudad)">@ciudad</option>
+            }
+        </select>
+    </div>
+    <partial name="_FiltroComun" model="f" />
+</form>
+
+<partial name="_Resumen" model='(Model.Items.Count, Model.Total, "hoteles")' />
+
+@if (Model.Items.Count == 0)
+{
+    <div class="panel"><partial name="_Vacio" model="@("No hay hoteles que coincidan con el filtro.")" /></div>
+}
+else
+{
+    <div class="grid-hoteles">
+        @foreach (var h in Model.Items)
+        {
+            <div class="panel hotel-card">
+                <div class="hotel-portada @(h.Estrellas >= 5 ? "v2" : h.Estrellas <= 3 ? "v3" : "")">
+                    <partial name="_Estatus" model="h.Estatus" />
+                    <partial name="_Icono" model="@("hotel")" />
+                </div>
+                <div class="panel-cuerpo">
+                    <span class="hotel-ciudad">@h.Ciudad</span>
+                    <h2 class="hotel-nombre">@h.Nombre</h2>
+                    <partial name="_Estrellas" model="h.Estrellas" />
+                    <p class="hotel-dir">@h.Direccion · @h.Telefono</p>
+                    <div class="hotel-datos">
+                        <span><b>@h.CantidadBloques</b> bloques</span>
+                        <span><b>@h.CantidadPisos</b> pisos</span>
+                        <span><b>@h.CantidadHabitaciones</b> habitaciones</span>
+                    </div>
+                    <div class="acciones">
+                        <a class="btn-app btn-chico btn-secundario" asp-action="Details" asp-route-id="@h.HotelId"><partial name="_Icono" model="@("ver")" /> Estructura</a>
+                        <a class="btn-app btn-chico btn-secundario" asp-action="Edit" asp-route-id="@h.HotelId"><partial name="_Icono" model="@("editar")" /> Editar</a>
+                        <partial name="_AccionesEstatus" model="(h.HotelId, h.Estatus)" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
