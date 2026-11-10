@@ -1,0 +1,20 @@
+@model (int Id, bool Estatus)
+@* Botón Activar / Inactivar común a todos los módulos. Envía un POST al controlador actual. *@
+@{
+    var volverA = Context.Request.Path + Context.Request.QueryString;
+}
+<form method="post" asp-action="@(Model.Estatus ? "Inactivar" : "Activar")" asp-route-id="@Model.Id">
+    <input type="hidden" name="volverA" value="@volverA" />
+    @if (Model.Estatus)
+    {
+        <button type="submit" class="btn-app btn-chico btn-peligro" data-confirmar="¿Seguro que desea inactivar este registro?" title="Inactivar">
+            <partial name="_Icono" model="@("power")" /> Inactivar
+        </button>
+    }
+    else
+    {
+        <button type="submit" class="btn-app btn-chico btn-secundario" title="Activar">
+            <partial name="_Icono" model="@("power")" /> Activar
+        </button>
+    }
+</form>

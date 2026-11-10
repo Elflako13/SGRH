@@ -1,0 +1,18 @@
+@model FiltroBase
+@* Campos que comparten todos los filtros: texto a buscar, estado y botones. *@
+<div class="campo buscar">
+    <label for="Buscar">Buscar</label>
+    <input class="control" id="Buscar" name="Buscar" value="@Model.Buscar" placeholder="Escriba para buscar..." />
+</div>
+<div class="campo">
+    <label for="Estado">Estado</label>
+    <select class="control" id="Estado" name="Estado" data-autoenviar>
+        <option value="activos" selected="@(Model.Estado == "activos")">Activos</option>
+        <option value="inactivos" selected="@(Model.Estado == "inactivos")">Inactivos</option>
+        <option value="todos" selected="@(Model.Estado == "todos")">Todos</option>
+    </select>
+</div>
+<div class="acciones">
+    <button type="submit" class="btn-app btn-primario"><partial name="_Icono" model="@("filtro")" /> Filtrar</button>
+    <a class="btn-app btn-secundario" asp-action="Index">Limpiar</a>
+</div>

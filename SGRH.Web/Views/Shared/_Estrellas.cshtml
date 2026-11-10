@@ -1,0 +1,2 @@
+@model int
+<span class="estrellas" title="@Model estrellas">@for (int i = 1; i <= 5; i++) { <span class="@(i <= Model ? "" : "apagada")">★</span> }</span>
