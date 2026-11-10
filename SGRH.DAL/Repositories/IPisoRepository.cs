@@ -11,5 +11,6 @@ namespace SGRH.DAL.Repositories
         Task<OperationResult<bool>> UpdateAsync(PisoUpdate piso);
         Task<OperationResult<bool>> RemoveAsync(PisoRemove piso);
         Task<OperationResult<List<PisoModel>>> GetByHotelAsync(int hotelId);
+        Task<OperationResult<bool>> ActivarAsync(int id, int? usuarioModificacion);
     }
 }

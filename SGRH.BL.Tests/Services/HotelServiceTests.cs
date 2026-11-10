@@ -12,7 +12,7 @@ namespace SGRH.BL.Tests.Services
         {
             using var db = new TestDatabase();
             using var context = db.CrearContexto();
-            var service = new HotelService(new HotelRepository(context));
+            var service = new HotelService(new HotelRepository(context), Log.De<HotelService>());
 
             var resultado = await service.AddAsync(new HotelAdd { Direccion = "Av. Las Américas" });
 
@@ -24,9 +24,9 @@ namespace SGRH.BL.Tests.Services
         {
             using var db = new TestDatabase();
             using var context = db.CrearContexto();
-            var service = new HotelService(new HotelRepository(context));
+            var service = new HotelService(new HotelRepository(context), Log.De<HotelService>());
 
-            await service.AddAsync(new HotelAdd { Nombre = "Hotel Caribe", Direccion = "Santo Domingo" });
+            await service.AddAsync(new HotelAdd { Nombre = "Hotel Caribe", Direccion = "Av. George Washington", Ciudad = "Santo Domingo", Estrellas = 4 });
             var hoteles = await service.GetAllAsync();
 
             Assert.True(hoteles.Success);
@@ -39,7 +39,7 @@ namespace SGRH.BL.Tests.Services
             using var db = new TestDatabase();
             var datos = db.Sembrar();
             using var context = db.CrearContexto();
-            var service = new HotelService(new HotelRepository(context));
+            var service = new HotelService(new HotelRepository(context), Log.De<HotelService>());
 
             var resultado = await service.RemoveAsync(new HotelRemove { Id = datos.HotelId });
 

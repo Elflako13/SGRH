@@ -1,3 +1,4 @@
+using SGRH.BL.Tests.Base;
 using SGRH.DAL.Models;
 using SGRH.DAL.Models.Base;
 
@@ -19,10 +20,10 @@ namespace SGRH.BL.Tests.Models
             var hotel = new Hotel { Nombre = "Hotel Prueba" };
             var piso1 = hotel.AgregarPiso(1);
             var piso2 = hotel.AgregarPiso(2);
-            piso1.AgregarHabitacion(new Habitacion("101", TipoHabitacion.Doble, 2, 2500m));
+            piso1.AgregarHabitacion(new Habitacion("101", Tipos.Doble, 2, 2500m));
 
             Assert.Throws<ReglaNegocioException>(() =>
-                piso2.AgregarHabitacion(new Habitacion("101", TipoHabitacion.Sencilla, 1, 1800m)));
+                piso2.AgregarHabitacion(new Habitacion("101", Tipos.Sencilla, 1, 1800m)));
         }
 
         [Fact]
@@ -33,7 +34,7 @@ namespace SGRH.BL.Tests.Models
             piso.Inactivar();
 
             Assert.Throws<ReglaNegocioException>(() =>
-                piso.AgregarHabitacion(new Habitacion("301", TipoHabitacion.Suite, 4, 6000m)));
+                piso.AgregarHabitacion(new Habitacion("301", Tipos.Suite, 4, 6000m)));
         }
     }
 }

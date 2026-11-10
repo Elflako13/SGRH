@@ -34,12 +34,17 @@ namespace SGRH.BL.Tests.Base
         {
             using var context = CrearContexto();
 
-            var hotel = new Hotel { Nombre = "Hotel Prueba", Direccion = "Av. Las Américas" };
+            var sencilla = Tipos.Sencilla;
+            var doble = Tipos.Doble;
+            var suite = Tipos.Suite;
+            context.TiposHabitacion.AddRange(sencilla, doble, suite);
+
+            var hotel = new Hotel { Nombre = "Hotel Prueba", Direccion = "Av. Las Américas", Ciudad = "Santo Domingo", Estrellas = 4 };
             var piso1 = hotel.AgregarPiso(1);
             var piso2 = hotel.AgregarPiso(2);
-            var h101 = new Habitacion("101", TipoHabitacion.Doble, 2, 2500m);
-            var h102 = new Habitacion("102", TipoHabitacion.Sencilla, 1, 1800m);
-            var h201 = new Habitacion("201", TipoHabitacion.Suite, 4, 6000m);
+            var h101 = new Habitacion("101", doble, 2, 2500m);
+            var h102 = new Habitacion("102", sencilla, 1, 1800m);
+            var h201 = new Habitacion("201", suite, 4, 6000m);
             piso1.AgregarHabitacion(h101);
             piso1.AgregarHabitacion(h102);
             piso2.AgregarHabitacion(h201);
@@ -50,7 +55,7 @@ namespace SGRH.BL.Tests.Base
             context.Huespedes.Add(huesped);
             context.SaveChanges();
 
-            return new DatosDePrueba(hotel.Id, piso1.Id, piso2.Id, h101.Id, h102.Id, h201.Id, huesped.Id);
+            return new DatosDePrueba(hotel.Id, piso1.Id, piso2.Id, h101.Id, h102.Id, h201.Id, huesped.Id, sencilla.Id, doble.Id, suite.Id);
         }
 
         public void Dispose() => _connection.Dispose();
@@ -58,5 +63,14 @@ namespace SGRH.BL.Tests.Base
 
     public record DatosDePrueba(int HotelId, int Piso1Id, int Piso2Id,
                                 int Habitacion101Id, int Habitacion102Id, int Habitacion201Id,
-                                int HuespedId);
+                                int HuespedId,
+                                int TipoSencillaId, int TipoDobleId, int TipoSuiteId);
+
+    /// <summary>Tipos de habitación de prueba. Cada llamada crea un objeto nuevo.</summary>
+    public static class Tipos
+    {
+        public static TipoHabitacion Sencilla => new() { Nombre = "Sencilla", TarifaBase = 1800m };
+        public static TipoHabitacion Doble => new() { Nombre = "Doble", TarifaBase = 2500m };
+        public static TipoHabitacion Suite => new() { Nombre = "Suite", TarifaBase = 6000m };
+    }
 }

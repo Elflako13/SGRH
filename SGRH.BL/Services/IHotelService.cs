@@ -10,5 +10,6 @@ namespace SGRH.BL.Services
         Task<OperationResult<bool>> AddAsync(HotelAdd hotel);
         Task<OperationResult<bool>> UpdateAsync(HotelUpdate hotel);
         Task<OperationResult<bool>> RemoveAsync(HotelRemove hotel);
+        Task<OperationResult<bool>> ActivarAsync(int id, int? usuarioModificacion);
     }
 }

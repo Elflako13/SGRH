@@ -13,7 +13,9 @@ namespace SGRH.DAL.Data
         #region Configuration
         public DbSet<CadenaHotelera> CadenasHoteleras { get; set; }
         public DbSet<Hotel> Hoteles { get; set; }
+        public DbSet<Bloque> Bloques { get; set; }
         public DbSet<Piso> Pisos { get; set; }
+        public DbSet<TipoHabitacion> TiposHabitacion { get; set; }
         public DbSet<Habitacion> Habitaciones { get; set; }
         #endregion
 
@@ -57,6 +59,7 @@ namespace SGRH.DAL.Data
                 e.Property(h => h.Direccion).IsRequired().HasMaxLength(250);
                 e.Property(h => h.Telefono).HasMaxLength(20);
                 e.Property(h => h.Correo).HasMaxLength(150);
+                e.Property(h => h.Ciudad).IsRequired().HasMaxLength(100);
 
                 e.HasOne(h => h.CadenaHotelera)
                  .WithMany(c => c.Hoteles)
@@ -64,9 +67,38 @@ namespace SGRH.DAL.Data
                  .OnDelete(DeleteBehavior.Restrict);
             });
 
+            modelBuilder.Entity<Bloque>(e =>
+            {
+                e.ToTable("Bloque", "Configuration");
+                e.Property(b => b.Nombre).IsRequired().HasMaxLength(100);
+                e.Property(b => b.Descripcion).HasMaxLength(250);
+
+                e.HasOne(b => b.Hotel)
+                 .WithMany(h => h.Bloques)
+                 .HasForeignKey(b => b.HotelId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                // No se repite el nombre del bloque dentro del mismo hotel.
+                e.HasIndex(b => new { b.HotelId, b.Nombre }).IsUnique();
+            });
+
+            modelBuilder.Entity<TipoHabitacion>(e =>
+            {
+                e.ToTable("TipoHabitacion", "Configuration");
+                e.Property(t => t.Nombre).IsRequired().HasMaxLength(50);
+                e.Property(t => t.Descripcion).HasMaxLength(250);
+                e.Property(t => t.TarifaBase).HasPrecision(10, 2);
+                e.HasIndex(t => t.Nombre).IsUnique();
+            });
+
             modelBuilder.Entity<Piso>(e =>
             {
                 e.ToTable("Piso", "Configuration");
+
+                e.HasOne(p => p.Bloque)
+                 .WithMany(b => b.Pisos)
+                 .HasForeignKey(p => p.BloqueId)
+                 .OnDelete(DeleteBehavior.NoAction);
 
                 // RN-002: un piso pertenece a un solo hotel.
                 e.HasOne(p => p.Hotel)
@@ -96,6 +128,11 @@ namespace SGRH.DAL.Data
                  .WithMany()
                  .HasForeignKey(h => h.HotelId)
                  .OnDelete(DeleteBehavior.NoAction);
+
+                e.HasOne(h => h.TipoHabitacion)
+                 .WithMany(t => t.Habitaciones)
+                 .HasForeignKey(h => h.TipoHabitacionId)
+                 .OnDelete(DeleteBehavior.Restrict);
 
                 // RN-005: el número de habitación es único dentro del hotel.
                 e.HasIndex(h => new { h.HotelId, h.Numero }).IsUnique();

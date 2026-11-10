@@ -28,7 +28,7 @@ namespace SGRH.BL.Tests.Services
             var datos = db.Sembrar();
             using var context = db.CrearContexto();
             int reservaId = await CrearReservaAsync(context, datos);
-            var service = new NotificacionService(new NotificacionRepository(context), Opciones.Notificacion());
+            var service = new NotificacionService(new NotificacionRepository(context), Opciones.Notificacion(), Log.De<NotificacionService>());
 
             var n1 = await service.AddAsync(new NotificacionAdd { ReservaId = reservaId, Tipo = TipoNotificacion.Confirmacion, Canal = CanalNotificacion.Correo, Mensaje = "Uno" });
             var n2 = await service.AddAsync(new NotificacionAdd { ReservaId = reservaId, Tipo = TipoNotificacion.Modificacion, Canal = CanalNotificacion.Correo, Mensaje = "Dos" });
@@ -51,7 +51,7 @@ namespace SGRH.BL.Tests.Services
             var datos = db.Sembrar();
             using var context = db.CrearContexto();
             int reservaId = await CrearReservaAsync(context, datos);
-            var service = new NotificacionService(new NotificacionRepository(context), Opciones.Notificacion());
+            var service = new NotificacionService(new NotificacionRepository(context), Opciones.Notificacion(), Log.De<NotificacionService>());
             var n = await service.AddAsync(new NotificacionAdd { ReservaId = reservaId, Tipo = TipoNotificacion.Confirmacion, Canal = CanalNotificacion.Correo, Mensaje = "Hola" });
             await service.RegistrarResultadoEnvioAsync(n.Data!.NotificacionId, false, "Sin conexión");
 
@@ -69,7 +69,7 @@ namespace SGRH.BL.Tests.Services
         {
             using var db = new TestDatabase();
             using var context = db.CrearContexto();
-            var service = new NotificacionService(new NotificacionRepository(context), Opciones.Notificacion());
+            var service = new NotificacionService(new NotificacionRepository(context), Opciones.Notificacion(), Log.De<NotificacionService>());
 
             var resultado = await service.AddAsync(new NotificacionAdd { ReservaId = 1, Mensaje = " " });
 

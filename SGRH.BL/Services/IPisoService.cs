@@ -10,6 +10,7 @@ namespace SGRH.BL.Services
         Task<OperationResult<bool>> AddAsync(PisoAdd piso);
         Task<OperationResult<bool>> UpdateAsync(PisoUpdate piso);
         Task<OperationResult<bool>> RemoveAsync(PisoRemove piso);
+        Task<OperationResult<bool>> ActivarAsync(int id, int? usuarioModificacion);
         Task<OperationResult<List<PisoModel>>> GetByHotelAsync(int hotelId);
     }
 }

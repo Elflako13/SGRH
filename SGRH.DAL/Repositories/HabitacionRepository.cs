@@ -21,12 +21,8 @@ namespace SGRH.DAL.Repositories
         {
             try
             {
-                var habitaciones = await context.Habitaciones
-                                                .Include(h => h.Piso)
-                                                .Where(h => h.Estatus)
-                                                .OrderBy(h => h.HotelId).ThenBy(h => h.Numero)
-                                                .ToListAsync();
-                return Success(habitaciones.Select(ToModel).ToList());
+                var habitaciones = await Consultar().OrderBy(h => h.Hotel).ThenBy(h => h.Numero).ToListAsync();
+                return Success(habitaciones);
             }
             catch (Exception)
             {
@@ -38,12 +34,10 @@ namespace SGRH.DAL.Repositories
         {
             try
             {
-                var habitaciones = await context.Habitaciones
-                                                .Include(h => h.Piso)
-                                                .Where(h => h.HotelId == hotelId)
-                                                .OrderBy(h => h.Numero)
-                                                .ToListAsync();
-                return Success(habitaciones.Select(ToModel).ToList());
+                var habitaciones = await Consultar().Where(h => h.HotelId == hotelId)
+                                                    .OrderBy(h => h.Numero)
+                                                    .ToListAsync();
+                return Success(habitaciones);
             }
             catch (Exception)
             {
@@ -53,11 +47,11 @@ namespace SGRH.DAL.Repositories
 
         public async Task<OperationResult<HabitacionModel>> GetByIdAsync(int id)
         {
-            var habitacion = await context.Habitaciones.Include(h => h.Piso).FirstOrDefaultAsync(h => h.Id == id);
+            var habitacion = await Consultar().FirstOrDefaultAsync(h => h.HabitacionId == id);
             if (habitacion is null)
                 return Failure<HabitacionModel>("La habitación no existe.");
 
-            return Success(ToModel(habitacion));
+            return Success(habitacion);
         }
 
         /// <summary>CU-009: habitaciones libres para esas fechas (RN-007, RN-010, RN-011, RN-012, RN-013).</summary>
@@ -84,7 +78,7 @@ namespace SGRH.DAL.Repositories
                                        Hotel = hotel.Nombre,
                                        Piso = piso.Numero,
                                        Numero = habitacion.Numero,
-                                       Tipo = habitacion.Tipo,
+                                       Tipo = habitacion.TipoHabitacion!.Nombre,
                                        Capacidad = habitacion.Capacidad,
                                        TarifaPorNoche = habitacion.TarifaPorNoche
                                    }).ToListAsync();
@@ -130,8 +124,12 @@ namespace SGRH.DAL.Repositories
                 if (await context.Habitaciones.AnyAsync(h => h.HotelId == piso.HotelId && h.Numero == numero))
                     return Failure<bool>($"Ya existe una habitación con el número {numero} en este hotel (RN-005).");
 
+                var tipoValidation = await ValidateTipoAsync(habitacion.TipoHabitacionId);
+                if (tipoValidation is not null)
+                    return Failure<bool>(tipoValidation);
+
                 // El constructor valida capacidad y tarifa mayores que cero.
-                var entity = new Habitacion(numero, habitacion.Tipo, habitacion.Capacidad, habitacion.TarifaPorNoche)
+                var entity = new Habitacion(numero, habitacion.TipoHabitacionId, habitacion.Capacidad, habitacion.TarifaPorNoche)
                 {
                     PisoId = piso.Id,
                     HotelId = piso.HotelId,
@@ -163,7 +161,11 @@ namespace SGRH.DAL.Repositories
                 if (entity is null)
                     return Failure<bool>("La habitación no existe.");
 
-                entity.Tipo = habitacion.Tipo;
+                var tipoValidation = await ValidateTipoAsync(habitacion.TipoHabitacionId);
+                if (tipoValidation is not null)
+                    return Failure<bool>(tipoValidation);
+
+                entity.TipoHabitacionId = habitacion.TipoHabitacionId;
                 entity.CambiarCapacidad(habitacion.Capacidad);
                 entity.ActualizarTarifa(habitacion.TarifaPorNoche);
                 entity.UsuarioModificacion = habitacion.UsuarioModificacion;
@@ -226,17 +228,30 @@ namespace SGRH.DAL.Repositories
             }
         }
 
-        private static HabitacionModel ToModel(Habitacion h) => new()
+        private async Task<string?> ValidateTipoAsync(int tipoHabitacionId)
         {
-            HabitacionId = h.Id,
-            Numero = h.Numero,
-            Tipo = h.Tipo,
-            Capacidad = h.Capacidad,
-            TarifaPorNoche = h.TarifaPorNoche,
-            Estado = h.Estado,
-            PisoId = h.PisoId,
-            NumeroPiso = h.Piso?.Numero ?? 0,
-            HotelId = h.HotelId
-        };
+            if (!await context.TiposHabitacion.AnyAsync(t => t.Id == tipoHabitacionId && t.Estatus))
+                return "El tipo de habitación no existe o está inactivo.";
+
+            return null;
+        }
+
+        private IQueryable<HabitacionModel> Consultar() =>
+            context.Habitaciones.Select(h => new HabitacionModel
+            {
+                HabitacionId = h.Id,
+                Numero = h.Numero,
+                TipoHabitacionId = h.TipoHabitacionId,
+                Tipo = h.TipoHabitacion!.Nombre,
+                Capacidad = h.Capacidad,
+                TarifaPorNoche = h.TarifaPorNoche,
+                Estado = h.Estado,
+                PisoId = h.PisoId,
+                NumeroPiso = h.Piso!.Numero,
+                Bloque = h.Piso.Bloque != null ? h.Piso.Bloque.Nombre : null,
+                HotelId = h.HotelId,
+                Hotel = h.Hotel!.Nombre,
+                Estatus = h.Estatus
+            });
     }
 }

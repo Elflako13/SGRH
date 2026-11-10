@@ -9,11 +9,16 @@ namespace SGRH.DAL.Models
         public string Direccion { get; set; } = string.Empty;
         public string? Telefono { get; set; }
         public string? Correo { get; set; }
+        public string Ciudad { get; set; } = string.Empty;
+
+        /// <summary>Categoría del hotel de 1 a 5 estrellas.</summary>
+        public int Estrellas { get; set; } = 3;
 
         public int? CadenaHoteleraId { get; set; }
         public CadenaHotelera? CadenaHotelera { get; set; }
 
         public List<Piso> Pisos { get; set; } = new();
+        public List<Bloque> Bloques { get; set; } = new();
 
         /// <summary>RN-001 y RN-003: agrega un piso validando que no exista otro activo con el mismo número.</summary>
         public Piso AgregarPiso(int numero)

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SGRH.BL.Configuration;
 using SGRH.DAL.Models;
@@ -17,7 +18,7 @@ namespace SGRH.BL.Services
     /// - genera la notificación al huésped al confirmar, modificar o cancelar (RN-014),
     ///   sin que un fallo de la notificación afecte a la reserva (RN-015).
     /// </summary>
-    public class ReservaService : IReservaService
+    public class ReservaService : ServiceBase, IReservaService
     {
         private readonly IReservaRepository reservaRepository;
         private readonly IHistorialReservaRepository historialRepository;
@@ -29,93 +30,91 @@ namespace SGRH.BL.Services
                               IHistorialReservaRepository historialRepository,
                               INotificacionRepository notificacionRepository,
                               IOptions<ReservaOptions> reservaOptions,
-                              IOptions<NotificacionOptions> notificacionOptions)
+                              IOptions<NotificacionOptions> notificacionOptions,
+                              ILogger<ReservaService> logger) : base(logger)
         {
-            this.reservaRepository = reservaRepository;
-            this.historialRepository = historialRepository;
-            this.notificacionRepository = notificacionRepository;
-            this.reservaOptions = reservaOptions.Value;
-            this.notificacionOptions = notificacionOptions.Value;
+            this.reservaRepository = reservaRepository ?? throw new ArgumentNullException(nameof(reservaRepository));
+            this.historialRepository = historialRepository ?? throw new ArgumentNullException(nameof(historialRepository));
+            this.notificacionRepository = notificacionRepository ?? throw new ArgumentNullException(nameof(notificacionRepository));
+            this.reservaOptions = reservaOptions?.Value ?? throw new ArgumentNullException(nameof(reservaOptions));
+            this.notificacionOptions = notificacionOptions?.Value ?? throw new ArgumentNullException(nameof(notificacionOptions));
         }
 
-        public Task<OperationResult<List<ReservaModel>>> GetAllAsync() => reservaRepository.GetAllAsync();
+        public Task<OperationResult<List<ReservaModel>>> GetAllAsync() =>
+            EjecutarAsync("consultar reservas", () => reservaRepository.GetAllAsync());
 
-        public Task<OperationResult<ReservaModel>> GetByIdAsync(int id) => reservaRepository.GetByIdAsync(id);
+        public Task<OperationResult<ReservaModel>> GetByIdAsync(int id) =>
+            EjecutarAsync("consultar reserva", () => ValidarId(id, "reserva"), () => reservaRepository.GetByIdAsync(id));
 
-        public Task<OperationResult<List<ReservaModel>>> GetByHuespedAsync(int huespedId) => reservaRepository.GetByHuespedAsync(huespedId);
+        public Task<OperationResult<List<ReservaModel>>> GetByHuespedAsync(int huespedId) =>
+            EjecutarAsync("consultar reservas del huésped", () => ValidarId(huespedId, "huésped"), () => reservaRepository.GetByHuespedAsync(huespedId));
 
-        public Task<OperationResult<List<HistorialReservaModel>>> GetHistorialAsync(int reservaId) => historialRepository.GetByReservaAsync(reservaId);
+        public Task<OperationResult<List<HistorialReservaModel>>> GetHistorialAsync(int reservaId) =>
+            EjecutarAsync("consultar historial de reserva", () => ValidarId(reservaId, "reserva"), () => historialRepository.GetByReservaAsync(reservaId));
 
         /// <summary>CU-010: crear reserva (queda Pendiente).</summary>
-        public async Task<OperationResult<ReservaModel>> AddAsync(ReservaAdd reserva)
-        {
-            if (reserva is null)
-                return Failure<ReservaModel>("El objeto ReservaAdd es requerido.");
+        public Task<OperationResult<ReservaModel>> AddAsync(ReservaAdd reserva) =>
+            EjecutarAsync("crear reserva",
+                          () => Requerido(reserva, nameof(ReservaAdd)) ?? ValidarLimites(reserva.FechaEntrada, reserva.FechaSalida),
+                          async () =>
+                          {
+                              var resultado = await reservaRepository.AddAsync(reserva);
 
-            var validation = ValidarLimites(reserva.FechaEntrada, reserva.FechaSalida);
-            if (validation is not null)
-                return Failure<ReservaModel>(validation);
+                              if (resultado.Success)
+                                  await RegistrarHistorialAsync(resultado.Data!.ReservaId, reserva.UsuarioCreacion, "Creación", $"Reserva {resultado.Data.Codigo} creada.");
 
-            var resultado = await reservaRepository.AddAsync(reserva);
-
-            if (resultado.Success)
-                await RegistrarHistorialAsync(resultado.Data!.ReservaId, reserva.UsuarioCreacion, "Creación", $"Reserva {resultado.Data.Codigo} creada.");
-
-            return resultado;
-        }
+                              return resultado;
+                          }, reserva?.UsuarioCreacion);
 
         /// <summary>CU-012: modificar reserva.</summary>
-        public async Task<OperationResult<bool>> UpdateAsync(ReservaUpdate reserva)
-        {
-            if (reserva is null)
-                return Failure<bool>("El objeto ReservaUpdate es requerido.");
+        public Task<OperationResult<bool>> UpdateAsync(ReservaUpdate reserva) =>
+            EjecutarAsync("modificar reserva",
+                          () => Requerido(reserva, nameof(ReservaUpdate)) ?? PrimerError(ValidarId(reserva.Id, "reserva"), ValidarLimites(reserva.FechaEntrada, reserva.FechaSalida)),
+                          async () =>
+                          {
+                              var resultado = await reservaRepository.UpdateAsync(reserva);
 
-            var validation = ValidarLimites(reserva.FechaEntrada, reserva.FechaSalida);
-            if (validation is not null)
-                return Failure<bool>(validation);
+                              if (resultado.Success)
+                              {
+                                  await RegistrarHistorialAsync(reserva.Id, reserva.UsuarioModificacion, "Modificación",
+                                                                $"Habitación {reserva.HabitacionId}, del {reserva.FechaEntrada:dd/MM/yyyy} al {reserva.FechaSalida:dd/MM/yyyy}.");
+                                  await NotificarAsync(reserva.Id, TipoNotificacion.Modificacion, reserva.UsuarioModificacion);
+                              }
 
-            var resultado = await reservaRepository.UpdateAsync(reserva);
-
-            if (resultado.Success)
-            {
-                await RegistrarHistorialAsync(reserva.Id, reserva.UsuarioModificacion, "Modificación",
-                                              $"Habitación {reserva.HabitacionId}, del {reserva.FechaEntrada:dd/MM/yyyy} al {reserva.FechaSalida:dd/MM/yyyy}.");
-                await NotificarAsync(reserva.Id, TipoNotificacion.Modificacion, reserva.UsuarioModificacion);
-            }
-
-            return resultado;
-        }
+                              return resultado;
+                          }, reserva?.UsuarioModificacion);
 
         /// <summary>CU-011: confirmar reserva.</summary>
-        public async Task<OperationResult<bool>> ConfirmarAsync(int reservaId, int? usuarioModificacion)
-        {
-            var resultado = await reservaRepository.ConfirmarAsync(reservaId, usuarioModificacion);
-
-            if (resultado.Success)
+        public Task<OperationResult<bool>> ConfirmarAsync(int reservaId, int? usuarioModificacion) =>
+            EjecutarAsync("confirmar reserva", () => ValidarId(reservaId, "reserva"), async () =>
             {
-                await RegistrarHistorialAsync(reservaId, usuarioModificacion, "Confirmación", null);
-                await NotificarAsync(reservaId, TipoNotificacion.Confirmacion, usuarioModificacion);
-            }
+                var resultado = await reservaRepository.ConfirmarAsync(reservaId, usuarioModificacion);
 
-            return resultado;
-        }
+                if (resultado.Success)
+                {
+                    await RegistrarHistorialAsync(reservaId, usuarioModificacion, "Confirmación", null);
+                    await NotificarAsync(reservaId, TipoNotificacion.Confirmacion, usuarioModificacion);
+                }
+
+                return resultado;
+            }, usuarioModificacion);
 
         /// <summary>CU-013: cancelar reserva.</summary>
-        public async Task<OperationResult<bool>> RemoveAsync(ReservaRemove reserva)
-        {
-            if (reserva is null)
-                return Failure<bool>("El objeto ReservaRemove es requerido.");
+        public Task<OperationResult<bool>> RemoveAsync(ReservaRemove reserva) =>
+            EjecutarAsync("cancelar reserva",
+                          () => Requerido(reserva, nameof(ReservaRemove)) ?? ValidarId(reserva.Id, "reserva"),
+                          async () =>
+                          {
+                              var resultado = await reservaRepository.RemoveAsync(reserva);
 
-            var resultado = await reservaRepository.RemoveAsync(reserva);
+                              if (resultado.Success)
+                              {
+                                  await RegistrarHistorialAsync(reserva.Id, reserva.UsuarioModificacion, "Cancelación", reserva.Motivo);
+                                  await NotificarAsync(reserva.Id, TipoNotificacion.Cancelacion, reserva.UsuarioModificacion);
+                              }
 
-            if (resultado.Success)
-            {
-                await RegistrarHistorialAsync(reserva.Id, reserva.UsuarioModificacion, "Cancelación", reserva.Motivo);
-                await NotificarAsync(reserva.Id, TipoNotificacion.Cancelacion, reserva.UsuarioModificacion);
-            }
-
-            return resultado;
-        }
+                              return resultado;
+                          }, reserva?.UsuarioModificacion);
 
         /// <summary>Límites de negocio configurables (ReservaOptions).</summary>
         private string? ValidarLimites(DateOnly entrada, DateOnly salida)
@@ -136,13 +135,16 @@ namespace SGRH.BL.Services
             if (usuarioId is null)
                 return;
 
-            await historialRepository.AddAsync(new HistorialReservaAdd
+            var resultado = await historialRepository.AddAsync(new HistorialReservaAdd
             {
                 ReservaId = reservaId,
                 UsuarioId = usuarioId.Value,
                 Accion = accion,
                 Detalle = detalle
             });
+
+            if (!resultado.Success)
+                logger.LogWarning("No se pudo registrar el historial ({Accion}) de la reserva {ReservaId}: {Mensaje}", accion, reservaId, resultado.Message);
         }
 
         /// <summary>
@@ -157,7 +159,7 @@ namespace SGRH.BL.Services
                 if (!reserva.Success)
                     return;
 
-                await notificacionRepository.AddAsync(new NotificacionAdd
+                var resultado = await notificacionRepository.AddAsync(new NotificacionAdd
                 {
                     ReservaId = reservaId,
                     Tipo = tipo,
@@ -165,10 +167,16 @@ namespace SGRH.BL.Services
                     Mensaje = CrearMensaje(reserva.Data!, tipo),
                     UsuarioCreacion = usuarioId
                 });
+
+                if (resultado.Success)
+                    logger.LogInformation("Notificación de {Tipo} generada para la reserva {ReservaId}.", tipo, reservaId);
+                else
+                    logger.LogWarning("No se generó la notificación de {Tipo} de la reserva {ReservaId}: {Mensaje}", tipo, reservaId, resultado.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // RN-015: el fallo de la notificación no afecta a la reserva.
+                // RN-015: el fallo de la notificación no afecta a la reserva, pero queda registrado.
+                logger.LogError(ex, "Error al generar la notificación de {Tipo} de la reserva {ReservaId}. Tipo: {ExceptionType}.", tipo, reservaId, ex.GetType().Name);
             }
         }
 

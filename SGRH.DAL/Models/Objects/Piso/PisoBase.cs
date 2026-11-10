@@ -4,5 +4,6 @@ namespace SGRH.DAL.Models.Objects.Piso
     {
         public int Numero { get; set; }
         public int HotelId { get; set; }
+        public int? BloqueId { get; set; }
     }
 }

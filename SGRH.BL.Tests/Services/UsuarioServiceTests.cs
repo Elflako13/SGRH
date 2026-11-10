@@ -11,7 +11,7 @@ namespace SGRH.BL.Tests.Services
         private static async Task<UsuarioService> CrearServicioAsync(TestDatabase db, Rol rol)
         {
             var context = db.CrearContexto();
-            var service = new UsuarioService(new UsuarioRepository(context));
+            var service = new UsuarioService(new UsuarioRepository(context), Log.De<UsuarioService>());
             await service.AddAsync(new UsuarioAdd { NombreUsuario = "usuario", NombreCompleto = "Usuario Prueba", Clave = "Clave123*", Rol = rol });
             return service;
         }

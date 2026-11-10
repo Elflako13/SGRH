@@ -7,7 +7,7 @@ namespace SGRH.DAL.Models.Objects.Habitacion
         public string Hotel { get; set; } = string.Empty;
         public int Piso { get; set; }
         public string Numero { get; set; } = string.Empty;
-        public TipoHabitacion Tipo { get; set; }
+        public string Tipo { get; set; } = string.Empty;
         public int Capacidad { get; set; }
         public decimal TarifaPorNoche { get; set; }
         public int Noches { get; set; }
