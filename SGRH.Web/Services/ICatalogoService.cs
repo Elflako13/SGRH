@@ -4,10 +4,6 @@ using SGRH.DAL.Models.Objects.TipoHabitacion;
 
 namespace SGRH.Web.Services
 {
-    /// <summary>
-    /// Arma las listas desplegables que usan varios formularios y filtros
-    /// (hoteles, bloques, pisos, tipos y estados). Así no se repite ese código en cada controlador (DRY).
-    /// </summary>
     public interface ICatalogoService
     {
         Task<SelectList> HotelesAsync(int? seleccionado = null);

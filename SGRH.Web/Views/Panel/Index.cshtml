@@ -1,0 +1,64 @@
+@model InicioViewModel
+@{
+    ViewData["Title"] = "Inicio";
+    int maximo = Math.Max(1, Model.HabitacionesPorEstado.Values.DefaultIfEmpty(0).Max());
+}
+<section class="bienvenida">
+    <div>
+        <span class="fecha">@{ var hoy = DateTime.Today.ToString("dddd, d 'de' MMMM 'de' yyyy"); }@(char.ToUpper(hoy[0]) + hoy[1..])</span>
+        <h1>Panel de la cadena hotelera</h1>
+        <p>Resumen de hoteles, bloques, pisos, habitaciones y tipos registrados en el sistema.</p>
+    </div>
+    <a class="btn-app btn-dorado" asp-controller="Habitaciones" asp-action="Index"><partial name="_Icono" model="@("habitacion")" /> Ver habitaciones</a>
+</section>
+
+<div class="stats">
+    <a class="panel stat" asp-controller="Hoteles" asp-action="Index"><span class="stat-icono"><partial name="_Icono" model="@("hotel")" /></span><span><span class="stat-valor">@Model.Hoteles</span><br /><span class="stat-texto">Hoteles activos</span></span></a>
+    <a class="panel stat" asp-controller="Bloques" asp-action="Index"><span class="stat-icono"><partial name="_Icono" model="@("bloque")" /></span><span><span class="stat-valor">@Model.Bloques</span><br /><span class="stat-texto">Bloques</span></span></a>
+    <a class="panel stat" asp-controller="Pisos" asp-action="Index"><span class="stat-icono"><partial name="_Icono" model="@("piso")" /></span><span><span class="stat-valor">@Model.Pisos</span><br /><span class="stat-texto">Pisos</span></span></a>
+    <a class="panel stat" asp-controller="Habitaciones" asp-action="Index"><span class="stat-icono"><partial name="_Icono" model="@("habitacion")" /></span><span><span class="stat-valor">@Model.Habitaciones</span><br /><span class="stat-texto">Habitaciones</span></span></a>
+    <a class="panel stat" asp-controller="TiposHabitacion" asp-action="Index"><span class="stat-icono"><partial name="_Icono" model="@("tipo")" /></span><span><span class="stat-valor">@Model.TiposHabitacion</span><br /><span class="stat-texto">Tipos de habitación</span></span></a>
+</div>
+
+<div class="dos-columnas">
+    <div>
+        <h2 class="panel-titulo">Hoteles de la cadena</h2>
+        <div class="grid-hoteles">
+            @foreach (var h in Model.HotelesDestacados)
+            {
+                <partial name="_TarjetaHotel" model="h" />
+            }
+        </div>
+    </div>
+
+    <div>
+        <div class="panel" style="margin-bottom:18px"><div class="panel-cuerpo">
+            <h2 class="panel-titulo">Habitaciones por estado</h2>
+            @foreach (var (estado, cantidad) in Model.HabitacionesPorEstado)
+            {
+                <div class="fila-estado">
+                    <span>@estado</span>
+                    <div class="barra"><span style="width:@(cantidad * 100 / maximo)%"></span></div>
+                    <b>@cantidad</b>
+                </div>
+            }
+        </div></div>
+
+        <div class="panel"><div class="panel-cuerpo">
+            <h2 class="panel-titulo">No disponibles ahora</h2>
+            @if (!Model.HabitacionesNoDisponibles.Any())
+            {
+                <p class="resumen">Todas las habitaciones están disponibles.</p>
+            }
+            <table class="tabla">
+                @foreach (var h in Model.HabitacionesNoDisponibles)
+                {
+                    <tr>
+                        <td><a asp-controller="Habitaciones" asp-action="Details" asp-route-id="@h.HabitacionId"><b>@h.Numero</b></a><span class="sub">@h.Hotel</span></td>
+                        <td style="text-align:right"><partial name="_EstadoHabitacion" model="h.Estado" /></td>
+                    </tr>
+                }
+            </table>
+        </div></div>
+    </div>
+</div>

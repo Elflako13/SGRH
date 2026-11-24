@@ -2,15 +2,10 @@ using SGRH.DAL.Models.Base;
 
 namespace SGRH.DAL.Models
 {
-    /// <summary>
-    /// Aviso al huésped sobre su reserva (RN-014). Tiene su propio estado, por eso un fallo
-    /// de envío no afecta a la reserva (RN-015).
-    /// </summary>
     public sealed class Notificacion : AuditEntity
     {
         public const int MaximoIntentos = 3;
 
-        // Constructor vacío requerido por Entity Framework Core.
         private Notificacion()
         {
         }
@@ -46,7 +41,6 @@ namespace SGRH.DAL.Models
             MarcarModificacion();
         }
 
-        /// <summary>RN-015: se registra el fallo, pero la reserva no se toca.</summary>
         public void MarcarFallida(string error)
         {
             Intentos++;
@@ -55,7 +49,6 @@ namespace SGRH.DAL.Models
             MarcarModificacion();
         }
 
-        /// <summary>CU-016: solo se reintentan las fallidas que no pasaron el máximo de intentos.</summary>
         public bool PuedeReintentar()
         {
             return Estado == EstadoNotificacion.Fallida && Intentos < MaximoIntentos;

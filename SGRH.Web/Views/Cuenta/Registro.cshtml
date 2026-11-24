@@ -1,0 +1,57 @@
+@model RegistroViewModel
+@{
+    ViewData["Title"] = "Crear cuenta";
+}
+<section class="auth">
+    <div class="panel auth-card ancho">
+        <div class="panel-cuerpo">
+            <h1>Crear cuenta</h1>
+            <p class="resumen">Con su cuenta puede reservar en línea y consultar o cancelar sus reservas.</p>
+            <form method="post" asp-action="Registro">
+                <partial name="_Validacion" />
+                <input type="hidden" asp-for="ReturnUrl" />
+                <div class="form-grid">
+                    <div class="form-campo">
+                        <label asp-for="Nombre"></label>
+                        <input class="control" asp-for="Nombre" />
+                        <span asp-validation-for="Nombre"></span>
+                    </div>
+                    <div class="form-campo">
+                        <label asp-for="Apellido"></label>
+                        <input class="control" asp-for="Apellido" />
+                        <span asp-validation-for="Apellido"></span>
+                    </div>
+                    <div class="form-campo">
+                        <label asp-for="Documento"></label>
+                        <input class="control" asp-for="Documento" placeholder="001-0000000-1" />
+                        <span asp-validation-for="Documento"></span>
+                    </div>
+                    <div class="form-campo">
+                        <label asp-for="Telefono"></label>
+                        <input class="control" asp-for="Telefono" placeholder="809-555-0000" />
+                        <span asp-validation-for="Telefono"></span>
+                    </div>
+                    <div class="form-campo ancho">
+                        <label asp-for="Correo"></label>
+                        <input class="control" asp-for="Correo" placeholder="correo@ejemplo.com" />
+                        <span asp-validation-for="Correo"></span>
+                    </div>
+                    <div class="form-campo">
+                        <label asp-for="Clave"></label>
+                        <input class="control" asp-for="Clave" />
+                        <span asp-validation-for="Clave"></span>
+                    </div>
+                    <div class="form-campo">
+                        <label asp-for="ConfirmarClave"></label>
+                        <input class="control" asp-for="ConfirmarClave" />
+                        <span asp-validation-for="ConfirmarClave"></span>
+                    </div>
+                </div>
+                <button type="submit" class="btn-app btn-primario ancho-completo" style="margin-top:16px">Crear cuenta</button>
+            </form>
+            <p class="auth-pie">¿Ya tiene cuenta? <a asp-action="Ingresar" asp-route-returnUrl="@Model.ReturnUrl">Iniciar sesión</a></p>
+        </div>
+    </div>
+</section>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

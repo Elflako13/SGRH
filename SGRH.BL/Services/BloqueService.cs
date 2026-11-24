@@ -5,7 +5,6 @@ using SGRH.DAL.Repositories;
 
 namespace SGRH.BL.Services
 {
-    /// <summary>Gestión de bloques (torres o edificios) de un hotel.</summary>
     public class BloqueService : ServiceBase, IBloqueService
     {
         private readonly IBloqueRepository bloqueRepository;

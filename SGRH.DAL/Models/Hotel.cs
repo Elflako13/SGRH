@@ -2,7 +2,6 @@ using SGRH.DAL.Models.Base;
 
 namespace SGRH.DAL.Models
 {
-    /// <summary>Hotel de la cadena. Controla sus pisos (Hotel 1 -> N Pisos).</summary>
     public sealed class Hotel : AuditEntity
     {
         public string Nombre { get; set; } = string.Empty;
@@ -11,7 +10,6 @@ namespace SGRH.DAL.Models
         public string? Correo { get; set; }
         public string Ciudad { get; set; } = string.Empty;
 
-        /// <summary>Categoría del hotel de 1 a 5 estrellas.</summary>
         public int Estrellas { get; set; } = 3;
 
         public int? CadenaHoteleraId { get; set; }
@@ -20,7 +18,6 @@ namespace SGRH.DAL.Models
         public List<Piso> Pisos { get; set; } = new();
         public List<Bloque> Bloques { get; set; } = new();
 
-        /// <summary>RN-001 y RN-003: agrega un piso validando que no exista otro activo con el mismo número.</summary>
         public Piso AgregarPiso(int numero)
         {
             if (numero <= 0)
@@ -35,7 +32,6 @@ namespace SGRH.DAL.Models
             return piso;
         }
 
-        /// <summary>RN-005: el número de habitación es único dentro de todo el hotel.</summary>
         public bool ExisteNumeroHabitacion(string numero)
         {
             return Pisos.SelectMany(p => p.Habitaciones)

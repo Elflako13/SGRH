@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SGRH.BL.Configuration;
+using SGRH.BL.Correo;
 using SGRH.DAL.Models;
 using SGRH.DAL.Models.Objects.HistorialReserva;
 using SGRH.DAL.Models.Objects.Notificacion;
@@ -11,24 +12,21 @@ using static SGRH.DAL.Models.Result.OperationResult;
 
 namespace SGRH.BL.Services
 {
-    /// <summary>
-    /// Casos de uso de la reserva (CU-010 a CU-013). Además de guardar a través del repositorio:
-    /// - aplica los límites de negocio de ReservaOptions,
-    /// - deja constancia de cada cambio en el historial (RF-021),
-    /// - genera la notificación al huésped al confirmar, modificar o cancelar (RN-014),
-    ///   sin que un fallo de la notificación afecte a la reserva (RN-015).
-    /// </summary>
     public class ReservaService : ServiceBase, IReservaService
     {
         private readonly IReservaRepository reservaRepository;
         private readonly IHistorialReservaRepository historialRepository;
         private readonly INotificacionRepository notificacionRepository;
+        private readonly IHuespedRepository huespedRepository;
+        private readonly IEnviadorCorreo enviadorCorreo;
         private readonly ReservaOptions reservaOptions;
         private readonly NotificacionOptions notificacionOptions;
 
         public ReservaService(IReservaRepository reservaRepository,
                               IHistorialReservaRepository historialRepository,
                               INotificacionRepository notificacionRepository,
+                              IHuespedRepository huespedRepository,
+                              IEnviadorCorreo enviadorCorreo,
                               IOptions<ReservaOptions> reservaOptions,
                               IOptions<NotificacionOptions> notificacionOptions,
                               ILogger<ReservaService> logger) : base(logger)
@@ -36,6 +34,8 @@ namespace SGRH.BL.Services
             this.reservaRepository = reservaRepository ?? throw new ArgumentNullException(nameof(reservaRepository));
             this.historialRepository = historialRepository ?? throw new ArgumentNullException(nameof(historialRepository));
             this.notificacionRepository = notificacionRepository ?? throw new ArgumentNullException(nameof(notificacionRepository));
+            this.huespedRepository = huespedRepository ?? throw new ArgumentNullException(nameof(huespedRepository));
+            this.enviadorCorreo = enviadorCorreo ?? throw new ArgumentNullException(nameof(enviadorCorreo));
             this.reservaOptions = reservaOptions?.Value ?? throw new ArgumentNullException(nameof(reservaOptions));
             this.notificacionOptions = notificacionOptions?.Value ?? throw new ArgumentNullException(nameof(notificacionOptions));
         }
@@ -52,7 +52,6 @@ namespace SGRH.BL.Services
         public Task<OperationResult<List<HistorialReservaModel>>> GetHistorialAsync(int reservaId) =>
             EjecutarAsync("consultar historial de reserva", () => ValidarId(reservaId, "reserva"), () => historialRepository.GetByReservaAsync(reservaId));
 
-        /// <summary>CU-010: crear reserva (queda Pendiente).</summary>
         public Task<OperationResult<ReservaModel>> AddAsync(ReservaAdd reserva) =>
             EjecutarAsync("crear reserva",
                           () => Requerido(reserva, nameof(ReservaAdd)) ?? ValidarLimites(reserva.FechaEntrada, reserva.FechaSalida),
@@ -61,12 +60,14 @@ namespace SGRH.BL.Services
                               var resultado = await reservaRepository.AddAsync(reserva);
 
                               if (resultado.Success)
+                              {
                                   await RegistrarHistorialAsync(resultado.Data!.ReservaId, reserva.UsuarioCreacion, "Creación", $"Reserva {resultado.Data.Codigo} creada.");
+                                  await NotificarAsync(resultado.Data.ReservaId, TipoNotificacion.Creacion, reserva.UsuarioCreacion);
+                              }
 
                               return resultado;
                           }, reserva?.UsuarioCreacion);
 
-        /// <summary>CU-012: modificar reserva.</summary>
         public Task<OperationResult<bool>> UpdateAsync(ReservaUpdate reserva) =>
             EjecutarAsync("modificar reserva",
                           () => Requerido(reserva, nameof(ReservaUpdate)) ?? PrimerError(ValidarId(reserva.Id, "reserva"), ValidarLimites(reserva.FechaEntrada, reserva.FechaSalida)),
@@ -84,7 +85,6 @@ namespace SGRH.BL.Services
                               return resultado;
                           }, reserva?.UsuarioModificacion);
 
-        /// <summary>CU-011: confirmar reserva.</summary>
         public Task<OperationResult<bool>> ConfirmarAsync(int reservaId, int? usuarioModificacion) =>
             EjecutarAsync("confirmar reserva", () => ValidarId(reservaId, "reserva"), async () =>
             {
@@ -99,7 +99,6 @@ namespace SGRH.BL.Services
                 return resultado;
             }, usuarioModificacion);
 
-        /// <summary>CU-013: cancelar reserva.</summary>
         public Task<OperationResult<bool>> RemoveAsync(ReservaRemove reserva) =>
             EjecutarAsync("cancelar reserva",
                           () => Requerido(reserva, nameof(ReservaRemove)) ?? ValidarId(reserva.Id, "reserva"),
@@ -116,7 +115,6 @@ namespace SGRH.BL.Services
                               return resultado;
                           }, reserva?.UsuarioModificacion);
 
-        /// <summary>Límites de negocio configurables (ReservaOptions).</summary>
         private string? ValidarLimites(DateOnly entrada, DateOnly salida)
         {
             int noches = salida.DayNumber - entrada.DayNumber;
@@ -147,10 +145,6 @@ namespace SGRH.BL.Services
                 logger.LogWarning("No se pudo registrar el historial ({Accion}) de la reserva {ReservaId}: {Mensaje}", accion, reservaId, resultado.Message);
         }
 
-        /// <summary>
-        /// RN-014: genera la notificación (queda Pendiente de envío).
-        /// RN-015: si algo falla aquí, la reserva ya está guardada y no se revierte.
-        /// </summary>
         private async Task NotificarAsync(int reservaId, TipoNotificacion tipo, int? usuarioId)
         {
             try
@@ -159,7 +153,7 @@ namespace SGRH.BL.Services
                 if (!reserva.Success)
                     return;
 
-                var resultado = await notificacionRepository.AddAsync(new NotificacionAdd
+                var notificacion = await notificacionRepository.AddAsync(new NotificacionAdd
                 {
                     ReservaId = reservaId,
                     Tipo = tipo,
@@ -168,15 +162,52 @@ namespace SGRH.BL.Services
                     UsuarioCreacion = usuarioId
                 });
 
-                if (resultado.Success)
-                    logger.LogInformation("Notificación de {Tipo} generada para la reserva {ReservaId}.", tipo, reservaId);
-                else
-                    logger.LogWarning("No se generó la notificación de {Tipo} de la reserva {ReservaId}: {Mensaje}", tipo, reservaId, resultado.Message);
+                if (!notificacion.Success)
+                {
+                    logger.LogWarning("No se generó la notificación de {Tipo} de la reserva {ReservaId}: {Mensaje}", tipo, reservaId, notificacion.Message);
+                    return;
+                }
+
+                logger.LogInformation("Notificación de {Tipo} generada para la reserva {ReservaId}.", tipo, reservaId);
+
+                if (notificacionOptions.CanalPorDefecto == CanalNotificacion.Correo)
+                    await EnviarCorreoAsync(reserva.Data!, tipo, notificacion.Data!.NotificacionId);
             }
             catch (Exception ex)
             {
-                // RN-015: el fallo de la notificación no afecta a la reserva, pero queda registrado.
                 logger.LogError(ex, "Error al generar la notificación de {Tipo} de la reserva {ReservaId}. Tipo: {ExceptionType}.", tipo, reservaId, ex.GetType().Name);
+            }
+        }
+
+        private async Task EnviarCorreoAsync(ReservaModel reserva, TipoNotificacion tipo, int notificacionId)
+        {
+            if (!enviadorCorreo.Habilitado)
+            {
+                logger.LogInformation("El envío de correos está desactivado; la notificación {NotificacionId} queda pendiente.", notificacionId);
+                return;
+            }
+
+            var huesped = await huespedRepository.GetByIdAsync(reserva.HuespedId);
+            string? correo = huesped.Success ? huesped.Data!.Correo : null;
+
+            if (string.IsNullOrWhiteSpace(correo))
+            {
+                await notificacionRepository.MarcarFallidaAsync(notificacionId, "El huésped no tiene un correo registrado.");
+                logger.LogWarning("La reserva {ReservaId} no tiene correo de huésped; la notificación {NotificacionId} quedó fallida.", reserva.ReservaId, notificacionId);
+                return;
+            }
+
+            try
+            {
+                await enviadorCorreo.EnviarAsync(correo,
+                                                 PlantillaCorreo.Asunto(reserva, tipo, notificacionOptions.Remitente),
+                                                 PlantillaCorreo.Reserva(reserva, tipo, notificacionOptions.Remitente));
+                await notificacionRepository.MarcarEnviadaAsync(notificacionId);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "No se pudo enviar el correo de la notificación {NotificacionId} a {Correo}. Tipo: {ExceptionType}.", notificacionId, correo, ex.GetType().Name);
+                await notificacionRepository.MarcarFallidaAsync(notificacionId, ex.Message);
             }
         }
 
@@ -184,6 +215,7 @@ namespace SGRH.BL.Services
         {
             string accion = tipo switch
             {
+                TipoNotificacion.Creacion => "ha sido recibida",
                 TipoNotificacion.Confirmacion => "ha sido confirmada",
                 TipoNotificacion.Modificacion => "ha sido modificada",
                 TipoNotificacion.Cancelacion => "ha sido cancelada",

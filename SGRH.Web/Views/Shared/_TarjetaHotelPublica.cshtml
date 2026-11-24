@@ -1,0 +1,16 @@
+@model HotelModel
+@{
+    var iniciales = Formato.Iniciales(Model.Nombre);
+}
+<a class="panel hotel-publico" asp-controller="Home" asp-action="Hotel" asp-route-id="@Model.HotelId">
+    <div class="hotel-publico-imagen cat-@Model.Estrellas">
+        <span>@iniciales</span>
+    </div>
+    <div class="panel-cuerpo">
+        <span class="hotel-ciudad">@Model.Ciudad</span>
+        <span class="hotel-nombre">@Model.Nombre</span>
+        <partial name="_Estrellas" model="Model.Estrellas" />
+        <span class="hotel-dir">@Model.Direccion</span>
+        <span class="enlace-mas">Ver habitaciones →</span>
+    </div>
+</a>

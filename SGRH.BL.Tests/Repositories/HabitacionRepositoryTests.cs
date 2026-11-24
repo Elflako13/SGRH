@@ -74,7 +74,6 @@ namespace SGRH.BL.Tests.Repositories
 
             var resultado = await repo.GetDisponiblesAsync(datos.HotelId, new DateOnly(2030, 1, 10), new DateOnly(2030, 1, 13), 2);
 
-            // 101 (doble) sí; 102 (sencilla) no por capacidad; 201 no por mantenimiento.
             Assert.True(resultado.Success);
             Assert.Single(resultado.Data!);
             Assert.Equal("101", resultado.Data![0].Numero);

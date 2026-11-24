@@ -6,8 +6,7 @@ using SGRH.Web.Services;
 
 namespace SGRH.Web.Controllers
 {
-    /// <summary>Gestión de pisos (CU-002): registrar, editar, activar e inactivar.</summary>
-    public class PisosController : BaseController
+    public class PisosController : AdminController
     {
         private readonly IPisoService pisoService;
         private readonly ICatalogoService catalogo;
@@ -18,7 +17,6 @@ namespace SGRH.Web.Controllers
             this.catalogo = catalogo;
         }
 
-        // GET: Pisos
         public async Task<IActionResult> Index(PisoFiltro filtro)
         {
             var resultado = await pisoService.GetAllAsync();
@@ -30,6 +28,7 @@ namespace SGRH.Web.Controllers
                               .Where(p => filtro.HotelId is null || p.HotelId == filtro.HotelId)
                               .Where(p => filtro.BloqueId is null || p.BloqueId == filtro.BloqueId)
                               .Where(p => filtro.Coincide(p.Hotel, p.Bloque, p.Numero.ToString()))
+                              .OrderByDescending(p => p.PisoId)
                               .ToList();
 
             ViewBag.Hoteles = await catalogo.HotelesAsync(filtro.HotelId);
@@ -37,10 +36,9 @@ namespace SGRH.Web.Controllers
             return View(new ListadoViewModel<PisoModel, PisoFiltro> { Items = items, Filtro = filtro, Total = pisos.Count });
         }
 
-        // GET: Pisos/Create?hotelId=1
-        public async Task<IActionResult> Create(int? hotelId)
+        public async Task<IActionResult> Create(int? hotelId, int? bloqueId)
         {
-            var modelo = new PisoViewModel { HotelId = hotelId ?? 0 };
+            var modelo = new PisoViewModel { HotelId = hotelId ?? 0, BloqueId = bloqueId };
             await CargarListasAsync(modelo);
             return View("Form", modelo);
         }
@@ -49,7 +47,6 @@ namespace SGRH.Web.Controllers
         public Task<IActionResult> Create(PisoViewModel modelo) =>
             GuardarAsync(modelo, () => pisoService.AddAsync(modelo.ToAdd(UsuarioActualId)), CargarListasAsync);
 
-        // GET: Pisos/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             var piso = await pisoService.GetByIdAsync(id);
@@ -76,7 +73,6 @@ namespace SGRH.Web.Controllers
         public Task<IActionResult> Activar(int id, string? volverA) =>
             EjecutarYVolverAsync(() => pisoService.ActivarAsync(id, UsuarioActualId), volverA);
 
-        // GET: Pisos/PorHotel?hotelId=1  -> lo usa el formulario de habitaciones para llenar la lista de pisos
         public async Task<IActionResult> PorHotel(int hotelId)
         {
             var lista = await catalogo.PisosAsync(hotelId);

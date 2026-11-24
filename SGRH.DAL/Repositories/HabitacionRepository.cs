@@ -54,23 +54,22 @@ namespace SGRH.DAL.Repositories
             return Success(habitacion);
         }
 
-        /// <summary>CU-009: habitaciones libres para esas fechas (RN-007, RN-010, RN-011, RN-012, RN-013).</summary>
         public async Task<OperationResult<List<HabitacionDisponibleModel>>> GetDisponiblesAsync(int hotelId, DateOnly entrada, DateOnly salida, int cantidadHuespedes)
         {
             try
             {
-                var fechas = new RangoFechas(entrada, salida); // RN-008
+                var fechas = new RangoFechas(entrada, salida);
 
                 var datos = await (from habitacion in context.Habitaciones
                                    join piso in context.Pisos on habitacion.PisoId equals piso.Id
                                    join hotel in context.Hoteles on habitacion.HotelId equals hotel.Id
                                    where habitacion.HotelId == hotelId
                                       && habitacion.Estatus
-                                      && (habitacion.Estado == EstadoHabitacion.Disponible || habitacion.Estado == EstadoHabitacion.Limpieza) // RN-007
-                                      && habitacion.Capacidad >= cantidadHuespedes                                                            // RN-011
+                                      && (habitacion.Estado == EstadoHabitacion.Disponible || habitacion.Estado == EstadoHabitacion.Limpieza)
+                                      && habitacion.Capacidad >= cantidadHuespedes
                                       && !context.Reservas.Any(r => r.HabitacionId == habitacion.Id
-                                                                 && (r.Estado == EstadoReserva.Pendiente || r.Estado == EstadoReserva.Confirmada) // RN-012
-                                                                 && r.Fechas.Entrada < salida && entrada < r.Fechas.Salida)                      // RN-010
+                                                                 && (r.Estado == EstadoReserva.Pendiente || r.Estado == EstadoReserva.Confirmada)
+                                                                 && r.Fechas.Entrada < salida && entrada < r.Fechas.Salida)
                                    orderby piso.Numero, habitacion.Numero
                                    select new HabitacionDisponibleModel
                                    {
@@ -86,7 +85,7 @@ namespace SGRH.DAL.Repositories
                 foreach (var d in datos)
                 {
                     d.Noches = fechas.Noches;
-                    d.CostoEstimado = d.TarifaPorNoche * fechas.Noches; // RN-013
+                    d.CostoEstimado = d.TarifaPorNoche * fechas.Noches;
                 }
 
                 return Success(datos);
@@ -111,7 +110,6 @@ namespace SGRH.DAL.Repositories
                 if (string.IsNullOrWhiteSpace(habitacion.Numero))
                     return Failure<bool>("El número de habitación es obligatorio.");
 
-                // RN-004 y RN-006: debe ir en un piso existente y activo.
                 var piso = await context.Pisos.FindAsync(habitacion.PisoId);
                 if (piso is null)
                     return Failure<bool>("El piso indicado no existe.");
@@ -119,7 +117,6 @@ namespace SGRH.DAL.Repositories
                 if (!piso.Estatus)
                     return Failure<bool>($"El piso {piso.Numero} está inactivo y no puede recibir habitaciones (RN-006).");
 
-                // RN-005
                 string numero = habitacion.Numero.Trim();
                 if (await context.Habitaciones.AnyAsync(h => h.HotelId == piso.HotelId && h.Numero == numero))
                     return Failure<bool>($"Ya existe una habitación con el número {numero} en este hotel (RN-005).");
@@ -128,7 +125,6 @@ namespace SGRH.DAL.Repositories
                 if (tipoValidation is not null)
                     return Failure<bool>(tipoValidation);
 
-                // El constructor valida capacidad y tarifa mayores que cero.
                 var entity = new Habitacion(numero, habitacion.TipoHabitacionId, habitacion.Capacidad, habitacion.TarifaPorNoche)
                 {
                     PisoId = piso.Id,
@@ -190,7 +186,6 @@ namespace SGRH.DAL.Repositories
             return await CambiarEstadoAsync(habitacion.Id, EstadoHabitacion.Inactiva, habitacion.UsuarioModificacion);
         }
 
-        /// <summary>CU-005: cambia el estado operativo validando RN-018.</summary>
         public async Task<OperationResult<bool>> CambiarEstadoAsync(int habitacionId, EstadoHabitacion estado, int? usuarioModificacion)
         {
             try

@@ -1,0 +1,158 @@
+@model ReservaViewModel
+@{
+    ViewData["Seccion"] = "Reservas";
+    ViewData["Title"] = "Nueva reserva";
+    ViewData["Descripcion"] = "Indique las fechas, elija el hotel y luego la habitación. No hace falta que el huésped tenga cuenta.";
+    var disponibles = ViewBag.Disponibles as List<HabitacionDisponibleModel>;
+    var hoteles = ViewBag.HotelesDisponibles as List<HotelResultado> ?? new();
+    int noches = Math.Max(0, Model.FechaSalida.DayNumber - Model.FechaEntrada.DayNumber);
+}
+<partial name="_Encabezado" />
+
+<form method="get" asp-action="Create" asp-fragment="habitaciones">
+    <div class="pasos">
+        <span class="paso hecho"><b>1</b> Fechas</span>
+        <span class="paso @(Model.HotelId > 0 ? "hecho" : "actual")"><b>2</b> Hotel</span>
+        <span class="paso @(Model.HotelId > 0 ? "actual" : "")"><b>3</b> Habitación y huésped</span>
+    </div>
+
+    <div class="panel" style="margin-bottom:18px">
+        <div class="filtros" style="margin:0">
+            <div class="campo">
+                <label for="FechaEntrada">Entrada</label>
+                <input class="control" type="date" id="FechaEntrada" name="FechaEntrada" value="@Model.FechaEntrada.ToString("yyyy-MM-dd")" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="campo">
+                <label for="FechaSalida">Salida</label>
+                <input class="control" type="date" id="FechaSalida" name="FechaSalida" value="@Model.FechaSalida.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="campo" style="max-width:130px">
+                <label for="CantidadHuespedes">Huéspedes</label>
+                <input class="control" type="number" min="1" max="20" id="CantidadHuespedes" name="CantidadHuespedes" value="@Model.CantidadHuespedes" />
+            </div>
+            <div class="acciones">
+                <button type="submit" name="HotelId" value="@Model.HotelId" class="btn-app btn-primario"><partial name="_Icono" model="@("buscar")" /> Actualizar disponibilidad</button>
+            </div>
+        </div>
+        <p class="form-ayuda" style="margin:0;padding:0 16px 14px">@noches @(noches == 1 ? "noche" : "noches") · @Model.CantidadHuespedes @(Model.CantidadHuespedes == 1 ? "huésped" : "huéspedes")</p>
+    </div>
+
+    @if (ViewBag.ErrorDisponibilidad is string errorDisp)
+    {
+        <div class="alerta alerta-error">✕ @errorDisp</div>
+    }
+
+    @if (hoteles.Count > 0)
+    {
+        <h2 class="titulo-seccion">Elija el hotel</h2>
+        <div class="grid-hoteles grid-eleccion">
+            @foreach (var r in hoteles)
+            {
+                bool elegido = r.Hotel.HotelId == Model.HotelId;
+                bool libre = r.Disponibles > 0;
+                <button type="submit" name="HotelId" value="@r.Hotel.HotelId"
+                        class="panel hotel-eleccion cat-@r.Hotel.Estrellas @(elegido ? "elegido" : "") @(libre ? "" : "agotado")"
+                        disabled="@(!libre)">
+                    <span class="hotel-cabecera">
+                        <span class="hotel-inicial">@Formato.Iniciales(r.Hotel.Nombre)</span>
+                        <span class="hotel-titulos">
+                            <span class="hotel-ciudad">@r.Hotel.Ciudad</span>
+                            <span class="hotel-nombre">@r.Hotel.Nombre</span>
+                            <partial name="_Estrellas" model="r.Hotel.Estrellas" />
+                        </span>
+                        @if (elegido)
+                        {
+                            <span class="badge-app ok">Elegido</span>
+                        }
+                    </span>
+                    <span class="eleccion-datos">
+                        <span><b>@r.Disponibles</b>@(r.Disponibles == 1 ? "habitación libre" : "habitaciones libres")</span>
+                        <span><b>@(r.DesdePorNoche is null ? "—" : Formato.Moneda(r.DesdePorNoche.Value))</b>desde / noche</span>
+                        <span><b>@(r.TotalDesde is null ? "—" : Formato.Moneda(r.TotalDesde.Value))</b>total desde</span>
+                    </span>
+                    <span class="eleccion-pie">@(libre ? (elegido ? "Viendo sus habitaciones ↓" : "Ver habitaciones →") : "Sin disponibilidad en esas fechas")</span>
+                </button>
+            }
+        </div>
+    }
+</form>
+
+@if (disponibles is not null)
+{
+    <form method="post" asp-action="Crear">
+        <partial name="_Validacion" />
+        <input type="hidden" asp-for="HotelId" />
+        <input type="hidden" name="FechaEntrada" value="@Model.FechaEntrada.ToString("yyyy-MM-dd")" />
+        <input type="hidden" name="FechaSalida" value="@Model.FechaSalida.ToString("yyyy-MM-dd")" />
+        <input type="hidden" asp-for="CantidadHuespedes" />
+
+        <h2 class="titulo-seccion" id="habitaciones">Habitaciones libres en @ViewBag.HotelSeleccionado</h2>
+        <p class="resumen">Toque una fila para elegir la habitación.</p>
+        <div class="panel tabla-contenedor" style="margin-bottom:18px">
+            @if (disponibles.Count == 0)
+            {
+                <partial name="_Vacio" model="@("No hay habitaciones disponibles para esas fechas. Pruebe con otras fechas o con menos huéspedes.")" />
+            }
+            else
+            {
+                <table class="tabla">
+                    <thead><tr><th></th><th>Habitación</th><th>Tipo</th><th>Capacidad</th><th>Tarifa por noche</th><th>Noches</th><th>Total estimado</th></tr></thead>
+                    <tbody>
+                        @foreach (var h in disponibles)
+                        {
+                            <tr class="fila-elegible">
+                                <td><input type="radio" name="HabitacionId" value="@h.HabitacionId" checked="@(Model.HabitacionId == h.HabitacionId)" required /></td>
+                                <td><b>@h.Numero</b><span class="sub">Piso @h.Piso</span></td>
+                                <td>@h.Tipo</td>
+                                <td>@h.Capacidad pers.</td>
+                                <td>@Formato.Moneda(h.TarifaPorNoche)</td>
+                                <td>@h.Noches</td>
+                                <td><b>@Formato.Moneda(h.CostoEstimado)</b></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        @if (disponibles.Count > 0)
+        {
+            <div class="panel form-contenedor"><div class="panel-cuerpo">
+                <h2 class="panel-titulo">Datos del huésped</h2>
+                <div class="form-grid">
+                    <div class="form-campo ancho">
+                        <label asp-for="Documento"></label>
+                        <input class="control" asp-for="Documento" placeholder="001-0000000-1" />
+                        <span asp-validation-for="Documento"></span>
+                        <div class="form-ayuda">Si el huésped ya está registrado con ese documento, se usan sus datos.</div>
+                    </div>
+                    <div class="form-campo">
+                        <label asp-for="Nombre"></label>
+                        <input class="control" asp-for="Nombre" />
+                        <span asp-validation-for="Nombre"></span>
+                    </div>
+                    <div class="form-campo">
+                        <label asp-for="Apellido"></label>
+                        <input class="control" asp-for="Apellido" />
+                        <span asp-validation-for="Apellido"></span>
+                    </div>
+                    <div class="form-campo">
+                        <label asp-for="Correo"></label>
+                        <input class="control" asp-for="Correo" placeholder="correo@ejemplo.com" />
+                        <span asp-validation-for="Correo"></span>
+                    </div>
+                    <div class="form-campo">
+                        <label asp-for="Telefono"></label>
+                        <input class="control" asp-for="Telefono" placeholder="809-555-0000" />
+                    </div>
+                </div>
+                <div class="form-pie">
+                    <a class="btn-app btn-secundario" asp-action="Index">Cancelar</a>
+                    <button type="submit" class="btn-app btn-primario">Reservar</button>
+                </div>
+            </div></div>
+        }
+    </form>
+}
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -5,7 +5,6 @@ using SGRH.DAL.Repositories;
 
 namespace SGRH.BL.Services
 {
-    /// <summary>Gestión de pisos (CU-002, RF-003, RF-004).</summary>
     public class PisoService : ServiceBase, IPisoService
     {
         private readonly IPisoRepository pisoRepository;

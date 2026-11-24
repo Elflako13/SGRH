@@ -5,6 +5,15 @@
     ViewData["Descripcion"] = "Un bloque pertenece a un solo hotel y su nombre no se repite dentro de ese hotel.";
 }
 <partial name="_Encabezado" />
+@if (!Model.EsNuevo)
+{
+    <partial name="_Atajos" model='new (string, string?, string)[]
+    {
+        ("Pisos de este bloque", Url.Action("Index", "Pisos", new { HotelId = Model.HotelId, BloqueId = Model.Id }), "piso"),
+        ("Agregar piso", Url.Action("Create", "Pisos", new { hotelId = Model.HotelId, bloqueId = Model.Id }), "mas"),
+        ("Estructura del hotel", Url.Action("Details", "Hoteles", new { id = Model.HotelId }), "hotel")
+    }' />
+}
 
 <div class="panel form-contenedor">
     <form method="post" asp-action="@(Model.EsNuevo ? "Create" : "Edit")" asp-route-id="@(Model.EsNuevo ? null : Model.Id)" class="panel-cuerpo">

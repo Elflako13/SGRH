@@ -39,7 +39,6 @@ namespace SGRH.DAL.Repositories
             return Success(ToModel(reserva));
         }
 
-        /// <summary>CU-014: historial de reservas de un huésped.</summary>
         public async Task<OperationResult<List<ReservaModel>>> GetByHuespedAsync(int huespedId)
         {
             try
@@ -62,7 +61,6 @@ namespace SGRH.DAL.Repositories
                 if (reserva is null)
                     return Failure<ReservaModel>("El objeto ReservaAdd es requerido.");
 
-                // RN-017: la reserva debe tener un huésped registrado.
                 var huesped = await context.Huespedes.FindAsync(reserva.HuespedId);
                 if (huesped is null || !huesped.Estatus)
                     return Failure<ReservaModel>("El huésped no está registrado (RN-017).");
@@ -71,13 +69,12 @@ namespace SGRH.DAL.Repositories
                 if (habitacion is null)
                     return Failure<ReservaModel>("La habitación no existe.");
 
-                var fechas = new RangoFechas(reserva.FechaEntrada, reserva.FechaSalida); // RN-008
+                var fechas = new RangoFechas(reserva.FechaEntrada, reserva.FechaSalida);
 
                 var validation = await ValidateFechasAsync(reserva.HabitacionId, fechas, null);
                 if (validation is not null)
                     return Failure<ReservaModel>(validation);
 
-                // El constructor valida RN-007 y RN-011 y calcula el precio (RN-013).
                 var entity = new Reserva(huesped, habitacion, fechas, reserva.CantidadHuespedes)
                 {
                     UsuarioCreacion = reserva.UsuarioCreacion
@@ -85,7 +82,9 @@ namespace SGRH.DAL.Repositories
 
                 await context.Reservas.AddAsync(entity);
                 await context.SaveChangesAsync();
-                return Success(ToModel(entity), $"Reserva {entity.Codigo} creada correctamente.");
+
+                var creada = await Consulta().FirstAsync(r => r.Id == entity.Id);
+                return Success(ToModel(creada), $"Reserva {entity.Codigo} creada correctamente.");
             }
             catch (ReglaNegocioException ex)
             {
@@ -118,7 +117,6 @@ namespace SGRH.DAL.Repositories
                 if (validation is not null)
                     return Failure<bool>(validation);
 
-                // Valida RN-016 (solo reservas activas), RN-007, RN-011 y recalcula el precio.
                 entity.Modificar(habitacion, fechas, reserva.CantidadHuespedes);
                 entity.UsuarioModificacion = reserva.UsuarioModificacion;
                 await context.SaveChangesAsync();
@@ -146,7 +144,7 @@ namespace SGRH.DAL.Repositories
                 if (entity is null)
                     return Failure<bool>("La reserva no existe.");
 
-                entity.Confirmar(); // RN-016
+                entity.Confirmar();
                 entity.UsuarioModificacion = usuarioModificacion;
                 await context.SaveChangesAsync();
                 return Success(true, $"Reserva {entity.Codigo} confirmada.");
@@ -172,7 +170,7 @@ namespace SGRH.DAL.Repositories
                 if (entity is null)
                     return Failure<bool>("La reserva no existe.");
 
-                entity.Cancelar(reserva.Motivo ?? string.Empty); // RN-012 y RN-016
+                entity.Cancelar(reserva.Motivo ?? string.Empty);
                 entity.UsuarioModificacion = reserva.UsuarioModificacion;
                 await context.SaveChangesAsync();
                 return Success(true, $"Reserva {entity.Codigo} cancelada.");
@@ -187,7 +185,6 @@ namespace SGRH.DAL.Repositories
             }
         }
 
-        /// <summary>RN-009 y RN-010.</summary>
         private async Task<string?> ValidateFechasAsync(int habitacionId, RangoFechas fechas, int? reservaId)
         {
             if (fechas.EmpiezaAntesDe(DateOnly.FromDateTime(DateTime.Today)))
@@ -198,8 +195,8 @@ namespace SGRH.DAL.Repositories
 
             bool seSolapa = await context.Reservas.AnyAsync(r => r.HabitacionId == habitacionId
                                                               && r.Id != reservaId
-                                                              && (r.Estado == EstadoReserva.Pendiente || r.Estado == EstadoReserva.Confirmada) // RN-012
-                                                              && r.Fechas.Entrada < salida && entrada < r.Fechas.Salida);                      // RN-010
+                                                              && (r.Estado == EstadoReserva.Pendiente || r.Estado == EstadoReserva.Confirmada)
+                                                              && r.Fechas.Entrada < salida && entrada < r.Fechas.Salida);
             if (seSolapa)
                 return $"La habitación ya está reservada entre {fechas} (RN-010).";
 
@@ -208,7 +205,9 @@ namespace SGRH.DAL.Repositories
 
         private IQueryable<Reserva> Consulta()
         {
-            return context.Reservas.Include(r => r.Huesped).Include(r => r.Habitacion);
+            return context.Reservas.Include(r => r.Huesped)
+                                   .Include(r => r.Habitacion).ThenInclude(h => h!.Hotel)
+                                   .Include(r => r.Habitacion).ThenInclude(h => h!.TipoHabitacion);
         }
 
         private static ReservaModel ToModel(Reserva r) => new()
@@ -219,6 +218,8 @@ namespace SGRH.DAL.Repositories
             Huesped = r.Huesped?.NombreCompleto ?? string.Empty,
             HabitacionId = r.HabitacionId,
             Habitacion = r.Habitacion?.Numero ?? string.Empty,
+            Hotel = r.Habitacion?.Hotel?.Nombre ?? string.Empty,
+            TipoHabitacion = r.Habitacion?.TipoHabitacion?.Nombre ?? string.Empty,
             FechaEntrada = r.Fechas.Entrada,
             FechaSalida = r.Fechas.Salida,
             CantidadHuespedes = r.CantidadHuespedes,

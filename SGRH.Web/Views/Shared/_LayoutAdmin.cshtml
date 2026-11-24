@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · Administración SGRH</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body data-resaltar="@TempData["Resaltar"]">
+    @{
+        var controlador = ViewContext.RouteData.Values["controller"]?.ToString();
+        string Activo(string nombre) => controlador == nombre ? "activo" : "";
+        string nombreUsuario = User.Identity?.Name ?? "Administrador";
+        string primerNombre = nombreUsuario.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? nombreUsuario;
+    }
+    <div class="app">
+        <header class="barra-superior">
+            <div class="barra-interior">
+                <a class="brand" asp-controller="Panel" asp-action="Index">
+                    <span class="brand-logo">H</span>
+                    <span class="brand-nombre">SGRH <span class="brand-sub">· Administración</span></span>
+                </a>
+
+                <nav class="menu">
+                    <a class="@Activo("Panel")" asp-controller="Panel" asp-action="Index"><partial name="_Icono" model="@("inicio")" /> Panel</a>
+                    <a class="@Activo("Hoteles")" asp-controller="Hoteles" asp-action="Index"><partial name="_Icono" model="@("hotel")" /> Hoteles</a>
+                    <a class="@Activo("Bloques")" asp-controller="Bloques" asp-action="Index"><partial name="_Icono" model="@("bloque")" /> Bloques</a>
+                    <a class="@Activo("Pisos")" asp-controller="Pisos" asp-action="Index"><partial name="_Icono" model="@("piso")" /> Pisos</a>
+                    <a class="@Activo("Habitaciones")" asp-controller="Habitaciones" asp-action="Index"><partial name="_Icono" model="@("habitacion")" /> Habitaciones</a>
+                    <a class="@Activo("Reservas")" asp-controller="Reservas" asp-action="Index"><partial name="_Icono" model="@("ver")" /> Reservas</a>
+                    <a class="@Activo("TiposHabitacion")" asp-controller="TiposHabitacion" asp-action="Index"><partial name="_Icono" model="@("tipo")" /> Tipos</a>
+                </nav>
+
+                <div class="usuario-chip">
+                    <a class="enlace-claro" asp-controller="Home" asp-action="Index">Ver sitio</a>
+                    <span class="usuario" title="@nombreUsuario"><span class="avatar">@primerNombre[..1].ToUpper()</span> @primerNombre</span>
+                    <form method="post" asp-controller="Cuenta" asp-action="Salir" style="margin:0">
+                        <button type="submit" class="btn-app btn-chico btn-salir">Salir</button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <div class="main">
+            <main class="content">
+                <div class="migas">
+                    <a asp-controller="Panel" asp-action="Index">Panel</a>
+                    @if (ViewData["Seccion"] is string seccion)
+                    {
+                        <span> › </span><a asp-action="Index">@seccion</a>
+                    }
+                    @if (controlador != "Panel")
+                    {
+                        <span> › @ViewData["Title"]</span>
+                    }
+                </div>
+                <partial name="_Alertas" />
+                @RenderBody()
+            </main>
+        </div>
+
+        <button type="button" class="btn-arriba" data-arriba aria-label="Volver arriba" title="Volver arriba">↑</button>
+
+        <footer class="pie">SGRH · Sistema de Gestión de Reservas de Hoteles · 2026</footer>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

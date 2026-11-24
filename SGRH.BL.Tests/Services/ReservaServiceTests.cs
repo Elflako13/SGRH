@@ -11,10 +11,12 @@ namespace SGRH.BL.Tests.Services
     {
         private static DateOnly Hoy => DateOnly.FromDateTime(DateTime.Today);
 
-        private static ReservaService CrearServicio(SGRHDbContext context, int maximoNoches = 30)
+        private static ReservaService CrearServicio(SGRHDbContext context, int maximoNoches = 30, EnviadorCorreoDePrueba? enviador = null)
             => new ReservaService(new ReservaRepository(context),
                                   new HistorialReservaRepository(context),
                                   new NotificacionRepository(context),
+                                  new HuespedRepository(context),
+                                  enviador ?? new EnviadorCorreoDePrueba(habilitado: false),
                                   Opciones.Reserva(maximoNoches),
                                   Opciones.Notificacion(),
                                   Log.De<ReservaService>());
@@ -80,8 +82,7 @@ namespace SGRH.BL.Tests.Services
             await service.ConfirmarAsync(creada.Data!.ReservaId, null);
 
             var notificaciones = await new NotificacionRepository(context).GetByReservaAsync(creada.Data.ReservaId);
-            var notificacion = Assert.Single(notificaciones.Data!);
-            Assert.Equal(TipoNotificacion.Confirmacion, notificacion.Tipo);
+            var notificacion = Assert.Single(notificaciones.Data!, n => n.Tipo == TipoNotificacion.Confirmacion);
             Assert.Equal(EstadoNotificacion.Pendiente, notificacion.Estado);
             Assert.Contains(creada.Data.Codigo, notificacion.Mensaje);
         }
@@ -99,7 +100,7 @@ namespace SGRH.BL.Tests.Services
 
             var notificaciones = await new NotificacionRepository(context).GetByReservaAsync(creada.Data.ReservaId);
             Assert.True(cancelada.Success);
-            Assert.Equal(TipoNotificacion.Cancelacion, Assert.Single(notificaciones.Data!).Tipo);
+            Assert.Single(notificaciones.Data!, n => n.Tipo == TipoNotificacion.Cancelacion);
         }
 
         [Fact]
@@ -116,7 +117,58 @@ namespace SGRH.BL.Tests.Services
 
             var notificaciones = await new NotificacionRepository(context).GetByReservaAsync(creada.Data.ReservaId);
             Assert.False(segunda.Success);
-            Assert.Single(notificaciones.Data!);
+            Assert.Single(notificaciones.Data!, n => n.Tipo == TipoNotificacion.Confirmacion);
+        }
+
+        [Fact]
+        public async Task Crear_ConCorreoHabilitado_EnviaCorreoAlHuespedYMarcaEnviada()
+        {
+            using var db = new TestDatabase();
+            var datos = db.Sembrar();
+            using var context = db.CrearContexto();
+            var enviador = new EnviadorCorreoDePrueba();
+
+            var creada = await CrearServicio(context, enviador: enviador).AddAsync(Nueva(datos, 3, 5));
+
+            var correo = Assert.Single(enviador.Enviados);
+            var notificaciones = await new NotificacionRepository(context).GetByReservaAsync(creada.Data!.ReservaId);
+            var notificacion = Assert.Single(notificaciones.Data!);
+            Assert.Equal("ana@correo.com", correo.Destinatario);
+            Assert.Contains(creada.Data.Codigo, correo.Asunto);
+            Assert.Contains("Reserva recibida", correo.Cuerpo);
+            Assert.Equal(TipoNotificacion.Creacion, notificacion.Tipo);
+            Assert.Equal(EstadoNotificacion.Enviada, notificacion.Estado);
+        }
+
+        [Fact]
+        public async Task Crear_SiFallaElCorreo_LaReservaSeGuardaYLaNotificacionQuedaFallida()
+        {
+            using var db = new TestDatabase();
+            var datos = db.Sembrar();
+            using var context = db.CrearContexto();
+
+            var creada = await CrearServicio(context, enviador: new EnviadorCorreoDePrueba(fallar: true)).AddAsync(Nueva(datos, 3, 5));
+
+            var notificaciones = await new NotificacionRepository(context).GetByReservaAsync(creada.Data!.ReservaId);
+            var notificacion = Assert.Single(notificaciones.Data!);
+            Assert.True(creada.Success);
+            Assert.Equal(EstadoNotificacion.Fallida, notificacion.Estado);
+            Assert.Contains("no disponible", notificacion.Error);
+        }
+
+        [Fact]
+        public async Task Crear_ConCorreoDesactivado_LaNotificacionQuedaPendiente()
+        {
+            using var db = new TestDatabase();
+            var datos = db.Sembrar();
+            using var context = db.CrearContexto();
+            var enviador = new EnviadorCorreoDePrueba(habilitado: false);
+
+            var creada = await CrearServicio(context, enviador: enviador).AddAsync(Nueva(datos, 3, 5));
+
+            var notificaciones = await new NotificacionRepository(context).GetByReservaAsync(creada.Data!.ReservaId);
+            Assert.Empty(enviador.Enviados);
+            Assert.Equal(EstadoNotificacion.Pendiente, Assert.Single(notificaciones.Data!).Estado);
         }
     }
 }

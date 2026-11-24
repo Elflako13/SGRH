@@ -26,14 +26,14 @@
     else
     {
         <table class="tabla">
-            <thead><tr><th>Bloque</th><th>Hotel</th><th>Pisos activos</th><th>Estado</th><th></th></tr></thead>
+            <thead><tr><th>Bloque</th><th>Hotel</th><th>Pisos</th><th>Estado</th><th></th></tr></thead>
             <tbody>
                 @foreach (var b in Model.Items)
                 {
-                    <tr>
+                    <tr data-id="@b.BloqueId">
                         <td><b>@b.Nombre</b><span class="sub">@b.Descripcion</span></td>
                         <td><a asp-controller="Hoteles" asp-action="Details" asp-route-id="@b.HotelId">@b.Hotel</a></td>
-                        <td>@b.CantidadPisos</td>
+                        <td><partial name="_Conteo" model='(b.CantidadPisos, Url.Action("Index", "Pisos", new { HotelId = b.HotelId, BloqueId = b.BloqueId }), b.Estatus ? Url.Action("Create", "Pisos", new { hotelId = b.HotelId, bloqueId = b.BloqueId }) : null)' /></td>
                         <td><partial name="_Estatus" model="b.Estatus" /></td>
                         <td>
                             <div class="acciones">

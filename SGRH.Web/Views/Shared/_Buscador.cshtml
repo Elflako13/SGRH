@@ -1,0 +1,26 @@
+@model BusquedaViewModel
+<form method="get" asp-controller="Home" asp-action="Buscar" class="buscador">
+    <div class="buscador-campo">
+        <label for="Ciudad">Destino</label>
+        <select id="Ciudad" name="Ciudad" class="control">
+            <option value="">Todos los destinos</option>
+            @foreach (var ciudad in Model.Ciudades)
+            {
+                <option value="@ciudad" selected="@(Model.Ciudad == ciudad)">@ciudad</option>
+            }
+        </select>
+    </div>
+    <div class="buscador-campo">
+        <label for="Entrada">Llegada</label>
+        <input id="Entrada" name="Entrada" type="date" class="control" value="@Model.Entrada.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="buscador-campo">
+        <label for="Salida">Salida</label>
+        <input id="Salida" name="Salida" type="date" class="control" value="@Model.Salida.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="buscador-campo chico">
+        <label for="Huespedes">Huéspedes</label>
+        <input id="Huespedes" name="Huespedes" type="number" min="1" max="20" class="control" value="@Model.Huespedes" />
+    </div>
+    <button type="submit" class="btn-app btn-dorado buscador-boton"><partial name="_Icono" model="@("buscar")" /> Buscar</button>
+</form>

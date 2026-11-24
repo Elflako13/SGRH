@@ -2,10 +2,8 @@ using SGRH.DAL.Models.Base;
 
 namespace SGRH.DAL.Models
 {
-    /// <summary>Habitación de un piso, con su capacidad, tarifa y estado operativo.</summary>
     public sealed class Habitacion : AuditEntity
     {
-        // Constructor vacío requerido por Entity Framework Core.
         private Habitacion()
         {
         }
@@ -38,27 +36,20 @@ namespace SGRH.DAL.Models
         public int PisoId { get; set; }
         public Piso? Piso { get; set; }
 
-        // Se guarda también el hotel para poder crear el índice único (HotelId, Numero) - RN-005.
         public int HotelId { get; set; }
         public Hotel? Hotel { get; set; }
 
-        /// <summary>RN-007: solo se reservan habitaciones activas que no estén en mantenimiento ni fuera de servicio.</summary>
         public bool EsReservable()
         {
             return Estatus
                 && (Estado == EstadoHabitacion.Disponible || Estado == EstadoHabitacion.Limpieza);
         }
 
-        /// <summary>RN-011: la cantidad de huéspedes debe estar entre 1 y la capacidad.</summary>
         public bool PuedeAlojar(int cantidadHuespedes)
         {
             return cantidadHuespedes >= 1 && cantidadHuespedes <= Capacidad;
         }
 
-        /// <summary>
-        /// Cambia el estado operativo. La verificación de reservas futuras (RN-018)
-        /// la hace la capa de aplicación antes de llamar a este método.
-        /// </summary>
         public void CambiarEstado(EstadoHabitacion nuevoEstado)
         {
             if (nuevoEstado == Estado)

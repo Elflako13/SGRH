@@ -2,9 +2,18 @@
 @{
     ViewData["Seccion"] = "Pisos";
     ViewData["Title"] = Model.EsNuevo ? "Nuevo piso" : "Editar piso";
-    ViewData["Descripcion"] = "Un piso pertenece a un solo hotel (RN-002). El bloque es opcional.";
+    ViewData["Descripcion"] = "Un piso pertenece a un solo hotel. El bloque es opcional.";
 }
 <partial name="_Encabezado" />
+@if (!Model.EsNuevo)
+{
+    <partial name="_Atajos" model='new (string, string?, string)[]
+    {
+        ("Habitaciones de este piso", Url.Action("Index", "Habitaciones", new { HotelId = Model.HotelId, PisoId = Model.Id }), "habitacion"),
+        ("Agregar habitación", Url.Action("Create", "Habitaciones", new { hotelId = Model.HotelId, pisoId = Model.Id }), "mas"),
+        ("Estructura del hotel", Url.Action("Details", "Hoteles", new { id = Model.HotelId }), "hotel")
+    }' />
+}
 
 <div class="panel form-contenedor">
     <form method="post" asp-action="@(Model.EsNuevo ? "Create" : "Edit")" asp-route-id="@(Model.EsNuevo ? null : Model.Id)" class="panel-cuerpo">
@@ -20,7 +29,7 @@
                 {
                     <select class="control" asp-items="ViewBag.Hoteles" disabled></select>
                     <input type="hidden" asp-for="HotelId" />
-                    <div class="form-ayuda">El piso no puede trasladarse a otro hotel (RN-002).</div>
+                    <div class="form-ayuda">El piso no puede trasladarse a otro hotel.</div>
                 }
                 <span asp-validation-for="HotelId"></span>
             </div>

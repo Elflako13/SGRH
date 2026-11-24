@@ -2,9 +2,20 @@
 @{
     ViewData["Seccion"] = "Hoteles";
     ViewData["Title"] = Model.EsNuevo ? "Nuevo hotel" : "Editar hotel";
-    ViewData["Descripcion"] = "Datos generales del hotel (CU-001).";
+    ViewData["Descripcion"] = "Datos generales del hotel.";
 }
 <partial name="_Encabezado" />
+@if (!Model.EsNuevo)
+{
+    <partial name="_Atajos" model='new (string, string?, string)[]
+    {
+        ("Estructura del hotel", Url.Action("Details", new { id = Model.Id }), "ver"),
+        ("Bloques", Url.Action("Index", "Bloques", new { HotelId = Model.Id }), "bloque"),
+        ("Pisos", Url.Action("Index", "Pisos", new { HotelId = Model.Id }), "piso"),
+        ("Habitaciones", Url.Action("Index", "Habitaciones", new { HotelId = Model.Id }), "habitacion"),
+        ("Agregar bloque", Url.Action("Create", "Bloques", new { hotelId = Model.Id }), "mas")
+    }' />
+}
 
 <div class="panel form-contenedor">
     <form method="post" asp-action="@(Model.EsNuevo ? "Create" : "Edit")" asp-route-id="@(Model.EsNuevo ? null : Model.Id)" class="panel-cuerpo">

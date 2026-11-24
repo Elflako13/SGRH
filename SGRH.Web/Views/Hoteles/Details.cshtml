@@ -3,7 +3,7 @@
     var h = Model.Hotel;
     ViewData["Seccion"] = "Hoteles";
     ViewData["Title"] = h.Nombre;
-    ViewData["Descripcion"] = "Estructura del hotel: bloques, pisos y habitaciones con su estado (CU-006).";
+    ViewData["Descripcion"] = "Estructura del hotel: bloques, pisos y habitaciones con su estado.";
     var grupos = Model.Pisos.GroupBy(p => p.Bloque ?? "Sin bloque").OrderBy(g => g.Key == "Sin bloque").ThenBy(g => g.Key);
 }
 <partial name="_Encabezado" />

@@ -1,7 +1,7 @@
 @model ListadoViewModel<PisoModel, PisoFiltro>
 @{
     ViewData["Title"] = "Pisos";
-    ViewData["Descripcion"] = "Pisos de cada hotel (CU-002). No puede haber dos pisos activos con el mismo número en un hotel (RN-003).";
+    ViewData["Descripcion"] = "Pisos de cada hotel. No puede haber dos pisos activos con el mismo número en un hotel.";
     ViewData["NuevoTexto"] = "Nuevo piso";
 }
 <partial name="_Encabezado" />
@@ -36,11 +36,11 @@
             <tbody>
                 @foreach (var p in Model.Items)
                 {
-                    <tr>
+                    <tr data-id="@p.PisoId">
                         <td><b>Piso @p.Numero</b></td>
                         <td><a asp-controller="Hoteles" asp-action="Details" asp-route-id="@p.HotelId">@p.Hotel</a></td>
                         <td>@(p.Bloque ?? "—")</td>
-                        <td>@p.CantidadHabitaciones</td>
+                        <td><partial name="_Conteo" model='(p.CantidadHabitaciones, Url.Action("Index", "Habitaciones", new { HotelId = p.HotelId, PisoId = p.PisoId }), p.Estatus ? Url.Action("Create", "Habitaciones", new { hotelId = p.HotelId, pisoId = p.PisoId }) : null)' /></td>
                         <td><partial name="_Estatus" model="p.Estatus" /></td>
                         <td>
                             <div class="acciones">

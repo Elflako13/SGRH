@@ -22,6 +22,7 @@ namespace SGRH.DAL.Repositories
             try
             {
                 var notificaciones = await context.Notificaciones
+                                                  .Include(n => n.Reserva).ThenInclude(r => r!.Huesped)
                                                   .Where(n => n.ReservaId == reservaId)
                                                   .OrderByDescending(n => n.FechaCreacion)
                                                   .ToListAsync();
@@ -33,12 +34,12 @@ namespace SGRH.DAL.Repositories
             }
         }
 
-        /// <summary>CU-016: fallidas que todavía no llegan al máximo de intentos.</summary>
         public async Task<OperationResult<List<NotificacionModel>>> GetPendientesDeReintentoAsync()
         {
             try
             {
                 var notificaciones = await context.Notificaciones
+                                                  .Include(n => n.Reserva).ThenInclude(r => r!.Huesped)
                                                   .Where(n => n.Estado == EstadoNotificacion.Fallida
                                                            && n.Intentos < Notificacion.MaximoIntentos)
                                                   .OrderBy(n => n.FechaCreacion)
@@ -58,7 +59,6 @@ namespace SGRH.DAL.Repositories
                 if (notificacion is null)
                     return Failure<NotificacionModel>("El objeto NotificacionAdd es requerido.");
 
-                // RN-014: toda notificación pertenece a una reserva existente.
                 if (!await context.Reservas.AnyAsync(r => r.Id == notificacion.ReservaId))
                     return Failure<NotificacionModel>("La reserva de la notificación no existe.");
 
@@ -92,7 +92,6 @@ namespace SGRH.DAL.Repositories
             return Success(true, "Notificación marcada como enviada.");
         }
 
-        /// <summary>RN-015: el fallo se registra, pero la reserva no se toca.</summary>
         public async Task<OperationResult<bool>> MarcarFallidaAsync(int notificacionId, string error)
         {
             var entity = await context.Notificaciones.FindAsync(notificacionId);
@@ -114,7 +113,8 @@ namespace SGRH.DAL.Repositories
             Estado = n.Estado,
             Intentos = n.Intentos,
             FechaEnvio = n.FechaEnvio,
-            Error = n.Error
+            Error = n.Error,
+            Destinatario = n.Reserva?.Huesped?.Correo
         };
     }
 }

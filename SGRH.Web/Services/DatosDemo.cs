@@ -4,10 +4,6 @@ using SGRH.DAL.Models;
 
 namespace SGRH.Web.Services
 {
-    /// <summary>
-    /// Solo se usa cuando "ProveedorBaseDatos" es "Sqlite": crea la base de datos y carga los mismos
-    /// datos de ejemplo del script Database/SGRH.sql. Con SQL Server no hace nada (se usa el script).
-    /// </summary>
     public static class DatosDemo
     {
         public static async Task InicializarAsync(IServiceProvider servicios, IConfiguration configuration)
@@ -22,7 +18,10 @@ namespace SGRH.Web.Services
             if (await context.Hoteles.AnyAsync())
                 return;
 
-            context.Usuarios.Add(new Usuario { NombreUsuario = "admin", NombreCompleto = "Administrador del sistema", Correo = "admin@sgrh.com", ClaveHash = "-", Rol = Rol.Administrador });
+            var ana = new Huesped { Nombre = "Ana", Apellido = "Pérez", Documento = "001-0000000-1", Correo = "ana.perez@correo.com", Telefono = "809-555-0123" };
+            context.Huespedes.Add(ana);
+            context.Usuarios.Add(new Usuario { NombreUsuario = "admin", NombreCompleto = "Administrador del sistema", Correo = "admin@sgrh.com", ClaveHash = Hash("Admin123*"), Rol = Rol.Administrador });
+            context.Usuarios.Add(new Usuario { NombreUsuario = "ana.perez@correo.com", NombreCompleto = "Ana Pérez", Correo = "ana.perez@correo.com", ClaveHash = Hash("Cliente123*"), Rol = Rol.Cliente, Huesped = ana });
 
             var sencilla = new TipoHabitacion { Nombre = "Sencilla", Descripcion = "Una cama individual, ideal para una persona.", TarifaBase = 1800m };
             var doble = new TipoHabitacion { Nombre = "Doble", Descripcion = "Dos camas o una cama matrimonial para dos personas.", TarifaBase = 2500m };
@@ -52,6 +51,9 @@ namespace SGRH.Web.Services
             context.Hoteles.AddRange(sd, pc, st);
             await context.SaveChangesAsync();
         }
+
+        private static string Hash(string clave) =>
+            Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(clave)));
 
         private static Hotel Hotel(string nombre, string direccion, string ciudad, int estrellas, string telefono, string correo) =>
             new() { Nombre = nombre, Direccion = direccion, Ciudad = ciudad, Estrellas = estrellas, Telefono = telefono, Correo = correo };

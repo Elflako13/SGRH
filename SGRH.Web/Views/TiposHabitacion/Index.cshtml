@@ -24,10 +24,10 @@
             <tbody>
                 @foreach (var t in Model.Items)
                 {
-                    <tr>
+                    <tr data-id="@t.TipoHabitacionId">
                         <td><b>@t.Nombre</b><span class="sub">@t.Descripcion</span></td>
                         <td>@Formato.Moneda(t.TarifaBase)</td>
-                        <td>@t.CantidadHabitaciones</td>
+                        <td><partial name="_Conteo" model='(t.CantidadHabitaciones, Url.Action("Index", "Habitaciones", new { TipoHabitacionId = t.TipoHabitacionId }), (string?)null)' /></td>
                         <td><partial name="_Estatus" model="t.Estatus" /></td>
                         <td>
                             <div class="acciones">

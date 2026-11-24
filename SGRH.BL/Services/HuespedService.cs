@@ -5,7 +5,6 @@ using SGRH.DAL.Repositories;
 
 namespace SGRH.BL.Services
 {
-    /// <summary>Registro y búsqueda de huéspedes (CU-007, CU-008).</summary>
     public class HuespedService : ServiceBase, IHuespedService
     {
         private readonly IHuespedRepository huespedRepository;

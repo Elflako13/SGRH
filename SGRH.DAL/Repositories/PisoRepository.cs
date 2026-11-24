@@ -92,7 +92,6 @@ namespace SGRH.DAL.Repositories
                 if (entity is null)
                     return Failure<bool>("El piso no existe.");
 
-                // RN-002: el piso no se puede trasladar a otro hotel.
                 if (entity.HotelId != piso.HotelId)
                     return Failure<bool>("Un piso pertenece a un solo hotel y no puede trasladarse a otro (RN-002).");
 
@@ -124,7 +123,6 @@ namespace SGRH.DAL.Repositories
                 if (entity is null)
                     return Failure<bool>("El piso no existe.");
 
-                // RN-018: no se inactiva un piso con reservas activas futuras.
                 var hoy = DateOnly.FromDateTime(DateTime.Today);
                 bool tieneReservas = await context.Reservas.AnyAsync(r => r.Habitacion!.PisoId == piso.Id
                                                                        && (r.Estado == EstadoReserva.Pendiente || r.Estado == EstadoReserva.Confirmada)
@@ -143,7 +141,6 @@ namespace SGRH.DAL.Repositories
             }
         }
 
-        /// <summary>RF-004: vuelve a activar un piso validando que no exista otro activo con el mismo número (RN-003).</summary>
         public async Task<OperationResult<bool>> ActivarAsync(int id, int? usuarioModificacion)
         {
             try
@@ -177,15 +174,12 @@ namespace SGRH.DAL.Repositories
             if (piso.Numero <= 0)
                 return "El número de piso debe ser mayor que cero.";
 
-            // RN-001 / RN-002
             if (!await context.Hoteles.AnyAsync(h => h.Id == piso.HotelId && h.Estatus))
                 return "El hotel no existe o está inactivo.";
 
-            // RN-003
             if (await context.Pisos.AnyAsync(p => p.HotelId == piso.HotelId && p.Numero == piso.Numero && p.Estatus && p.Id != pisoId))
                 return $"Ya existe un piso activo con el número {piso.Numero} en este hotel (RN-003).";
 
-            // El bloque es opcional, pero si se indica debe estar activo y ser del mismo hotel.
             if (piso.BloqueId.HasValue
                 && !await context.Bloques.AnyAsync(b => b.Id == piso.BloqueId && b.HotelId == piso.HotelId && b.Estatus))
                 return "El bloque indicado no existe, está inactivo o pertenece a otro hotel.";

@@ -16,7 +16,6 @@ namespace SGRH.DAL.Repositories
             this.context = context;
         }
 
-        /// <summary>Devuelve todos los hoteles (activos e inactivos) con la cantidad de bloques, pisos y habitaciones.</summary>
         public async Task<OperationResult<List<HotelModel>>> GetAllAsync()
         {
             try
@@ -103,7 +102,6 @@ namespace SGRH.DAL.Repositories
             }
         }
 
-        /// <summary>Inactiva el hotel (RF-002). No se permite si todavía tiene pisos activos.</summary>
         public async Task<OperationResult<bool>> RemoveAsync(HotelRemove hotel)
         {
             try
@@ -129,7 +127,6 @@ namespace SGRH.DAL.Repositories
             }
         }
 
-        /// <summary>Vuelve a activar un hotel inactivo (RF-002).</summary>
         public async Task<OperationResult<bool>> ActivarAsync(int id, int? usuarioModificacion)
         {
             try

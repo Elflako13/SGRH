@@ -7,10 +7,6 @@ using SGRH.DAL.Repositories;
 
 namespace SGRH.BL.Tests.Services
 {
-    /// <summary>
-    /// Comprueba el manejo de excepciones y el logging de la capa de negocio:
-    /// si el repositorio falla, el servicio no se cae, registra el error y responde con un mensaje claro.
-    /// </summary>
     public class ManejoDeErroresTests
     {
         [Fact]
@@ -59,7 +55,6 @@ namespace SGRH.BL.Tests.Services
             Assert.Throws<ArgumentNullException>(() => new HotelService(new HotelRepositoryQueFalla(), null!));
         }
 
-        /// <summary>Repositorio falso que simula una caída de la base de datos.</summary>
         private sealed class HotelRepositoryQueFalla : IHotelRepository
         {
             private static Task<T> Falla<T>() => throw new TimeoutException("La base de datos no responde.");

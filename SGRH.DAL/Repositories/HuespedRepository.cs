@@ -147,7 +147,6 @@ namespace SGRH.DAL.Repositories
             if (!correoValido && string.IsNullOrWhiteSpace(huesped.Telefono))
                 return "El huésped debe tener un correo o teléfono válido para poder notificarle.";
 
-            // RN-017
             string documento = huesped.Documento.Trim();
             if (await context.Huespedes.AnyAsync(h => h.Documento == documento && h.Id != huespedId))
                 return $"Ya existe un huésped con el documento {documento} (RN-017).";
