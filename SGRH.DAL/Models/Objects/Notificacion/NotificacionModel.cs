@@ -11,5 +11,6 @@ namespace SGRH.DAL.Models.Objects.Notificacion
         public int Intentos { get; set; }
         public DateTime? FechaEnvio { get; set; }
         public string? Error { get; set; }
+        public string? Destinatario { get; set; }
     }
 }

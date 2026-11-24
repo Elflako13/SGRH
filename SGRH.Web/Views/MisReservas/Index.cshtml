@@ -1,0 +1,49 @@
+@using SGRH.DAL.Models.Objects.Reserva
+@model List<ReservaModel>
+@{
+    ViewData["Title"] = "Mis reservas";
+    string Clase(EstadoReserva e) => e switch
+    {
+        EstadoReserva.Confirmada => "ok",
+        EstadoReserva.Pendiente => "warn",
+        EstadoReserva.Cancelada => "danger",
+        _ => "muted"
+    };
+    string Texto(EstadoReserva e) => e == EstadoReserva.Pendiente ? "Pendiente de confirmar" : e.ToString();
+}
+<section class="sitio-interior sitio-seccion">
+    <h1 class="sitio-titulo">Mis reservas</h1>
+
+    @if (!Model.Any())
+    {
+        <div class="panel">
+            <partial name="_Vacio" model="@("Todavía no tiene reservas.")" />
+            <div style="text-align:center;padding-bottom:24px"><a class="btn-app btn-primario" asp-controller="Home" asp-action="Index">Buscar hotel</a></div>
+        </div>
+    }
+
+    <div class="lista-resultados">
+        @foreach (var r in Model)
+        {
+            <div class="panel resultado">
+                <div class="habitacion-icono"><partial name="_Icono" model="@("hotel")" /></div>
+                <div class="resultado-info">
+                    <span class="hotel-ciudad">Reserva @r.Codigo</span>
+                    <span class="hotel-nombre">@r.Hotel</span>
+                    <span class="hotel-dir">Habitación @r.TipoHabitacion (@r.Habitacion) · @r.CantidadHuespedes huésped(es)</span>
+                    <span class="hotel-dir">@r.FechaEntrada.ToString("dd/MM/yyyy") → @r.FechaSalida.ToString("dd/MM/yyyy") · @r.Noches noche(s)</span>
+                </div>
+                <div class="resultado-precio">
+                    <span class="badge-app badge-@Clase(r.Estado)">@Texto(r.Estado)</span>
+                    <span class="total-grande">@Formato.Moneda(r.PrecioTotal)</span>
+                    @if (r.Estado is EstadoReserva.Pendiente or EstadoReserva.Confirmada)
+                    {
+                        <form method="post" asp-action="Cancelar" asp-route-id="@r.ReservaId">
+                            <button type="submit" class="btn-app btn-chico btn-peligro" data-confirmar="¿Seguro que desea cancelar esta reserva?">Cancelar reserva</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</section>

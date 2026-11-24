@@ -1,0 +1,8 @@
+@model IEnumerable<(string Texto, string? Url, string Icono)>
+<nav class="atajos" aria-label="Accesos rápidos">
+    <span class="atajos-titulo">Ir a</span>
+    @foreach (var atajo in Model)
+    {
+        <a class="atajo" href="@atajo.Url"><partial name="_Icono" model="atajo.Icono" /> @atajo.Texto</a>
+    }
+</nav>

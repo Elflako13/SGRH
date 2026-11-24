@@ -1,0 +1,82 @@
+@using SGRH.DAL.Models.Objects.Reserva
+@model List<ReservaModel>
+@{
+    ViewData["Title"] = "Reservas";
+    ViewData["Descripcion"] = "Reservas registradas. Una reserva nueva queda Pendiente hasta que se confirma.";
+    ViewData["NuevoTexto"] = "Nueva reserva";
+    var estado = (EstadoReserva?)ViewBag.Estado;
+    string Clase(EstadoReserva e) => e switch
+    {
+        EstadoReserva.Confirmada => "ok",
+        EstadoReserva.Pendiente => "warn",
+        EstadoReserva.Cancelada => "danger",
+        _ => "muted"
+    };
+}
+<partial name="_Encabezado" />
+
+<form method="get" class="panel filtros">
+    <div class="campo">
+        <label for="estado">Estado</label>
+        <select class="control" id="estado" name="estado" data-autoenviar>
+            <option value="">Todos</option>
+            @foreach (var e in Enum.GetValues<EstadoReserva>())
+            {
+                <option value="@e" selected="@(estado == e)">@e</option>
+            }
+        </select>
+    </div>
+    <div class="campo buscar">
+        <label for="buscar">Buscar</label>
+        <input class="control" id="buscar" name="buscar" value="@ViewBag.Buscar" placeholder="Código o nombre del huésped" />
+    </div>
+    <div class="acciones">
+        <button type="submit" class="btn-app btn-primario"><partial name="_Icono" model="@("filtro")" /> Filtrar</button>
+        <a class="btn-app btn-secundario" asp-action="Index">Limpiar</a>
+    </div>
+</form>
+
+<partial name="_Resumen" model='(Model.Count, (int)ViewBag.Total, "reservas")' />
+
+<div class="panel tabla-contenedor">
+    @if (Model.Count == 0)
+    {
+        <partial name="_Vacio" model="@("No hay reservas. Cree una con el botón «Nueva reserva».")" />
+    }
+    else
+    {
+        <table class="tabla">
+            <thead><tr><th>Código</th><th>Huésped</th><th>Habitación</th><th>Fechas</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var r in Model)
+                {
+                    <tr>
+                        <td><b>@r.Codigo</b></td>
+                        <td>@r.Huesped<span class="sub">@r.CantidadHuespedes huésped(es)</span></td>
+                        <td>@r.Habitacion</td>
+                        <td>@r.FechaEntrada.ToString("dd/MM/yyyy") → @r.FechaSalida.ToString("dd/MM/yyyy")<span class="sub">@r.Noches noche(s)</span></td>
+                        <td>@Formato.Moneda(r.PrecioTotal)</td>
+                        <td><span class="badge-app badge-@Clase(r.Estado)">@r.Estado</span>
+                            @if (r.MotivoCancelacion is not null) { <span class="sub">@r.MotivoCancelacion</span> }</td>
+                        <td>
+                            <div class="acciones">
+                                @if (r.Estado == EstadoReserva.Pendiente)
+                                {
+                                    <form method="post" asp-action="Confirmar" asp-route-id="@r.ReservaId">
+                                        <button type="submit" class="btn-app btn-chico btn-secundario">✓ Confirmar</button>
+                                    </form>
+                                }
+                                @if (r.Estado is EstadoReserva.Pendiente or EstadoReserva.Confirmada)
+                                {
+                                    <form method="post" asp-action="Cancelar" asp-route-id="@r.ReservaId">
+                                        <button type="submit" class="btn-app btn-chico btn-peligro" data-confirmar="¿Cancelar esta reserva? La habitación quedará libre para esas fechas.">✕ Cancelar</button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

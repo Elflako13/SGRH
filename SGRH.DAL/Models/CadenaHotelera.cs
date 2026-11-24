@@ -2,7 +2,6 @@ using SGRH.DAL.Models.Base;
 
 namespace SGRH.DAL.Models
 {
-    /// <summary>Organización dueña de uno o varios hoteles.</summary>
     public sealed class CadenaHotelera : AuditEntity
     {
         public string Nombre { get; set; } = string.Empty;

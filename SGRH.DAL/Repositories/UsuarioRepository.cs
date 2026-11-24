@@ -54,9 +54,8 @@ namespace SGRH.DAL.Repositories
 
         public async Task<OperationResult<UsuarioModel>> ValidarCredencialesAsync(string nombreUsuario, string clave)
         {
-            var usuario = await context.Usuarios.FirstOrDefaultAsync(u => u.NombreUsuario == nombreUsuario && u.Estatus);
+            var usuario = await context.Usuarios.FirstOrDefaultAsync(u => (u.NombreUsuario == nombreUsuario || u.Correo == nombreUsuario) && u.Estatus);
 
-            // Mismo mensaje en ambos casos para no revelar si el usuario existe.
             if (usuario is null || usuario.ClaveHash != HashClave(clave))
                 return Failure<UsuarioModel>("Usuario o clave incorrectos.");
 
@@ -84,6 +83,7 @@ namespace SGRH.DAL.Repositories
                     Correo = usuario.Correo?.Trim(),
                     Rol = usuario.Rol,
                     ClaveHash = HashClave(usuario.Clave),
+                    HuespedId = usuario.HuespedId,
                     UsuarioCreacion = usuario.UsuarioCreacion
                 });
                 await context.SaveChangesAsync();
@@ -147,6 +147,12 @@ namespace SGRH.DAL.Repositories
             }
         }
 
+        public Task<bool> ExisteParaHuespedAsync(int huespedId) =>
+            context.Usuarios.AnyAsync(u => u.HuespedId == huespedId);
+
+        public Task<bool> ExisteCorreoAsync(string correo) =>
+            context.Usuarios.AnyAsync(u => u.Correo == correo.Trim());
+
         private async Task<string?> ValidateUsuarioAsync(UsuarioBase usuario, int? usuarioId)
         {
             if (string.IsNullOrWhiteSpace(usuario.NombreUsuario))
@@ -173,7 +179,8 @@ namespace SGRH.DAL.Repositories
             NombreUsuario = u.NombreUsuario,
             NombreCompleto = u.NombreCompleto,
             Correo = u.Correo,
-            Rol = u.Rol
+            Rol = u.Rol,
+            HuespedId = u.HuespedId
         };
     }
 }

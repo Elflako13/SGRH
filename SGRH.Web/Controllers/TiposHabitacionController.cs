@@ -5,8 +5,7 @@ using SGRH.Web.Models;
 
 namespace SGRH.Web.Controllers
 {
-    /// <summary>Mantenimiento de tipos de habitación.</summary>
-    public class TiposHabitacionController : BaseController
+    public class TiposHabitacionController : AdminController
     {
         private readonly ITipoHabitacionService tipoService;
 
@@ -15,7 +14,6 @@ namespace SGRH.Web.Controllers
             this.tipoService = tipoService;
         }
 
-        // GET: TiposHabitacion
         public async Task<IActionResult> Index(FiltroBase filtro)
         {
             var resultado = await tipoService.GetAllAsync();
@@ -25,6 +23,7 @@ namespace SGRH.Web.Controllers
             var tipos = resultado.Data ?? [];
             var items = filtro.AplicarEstado(tipos, t => t.Estatus)
                               .Where(t => filtro.Coincide(t.Nombre, t.Descripcion))
+                              .OrderByDescending(t => t.TipoHabitacionId)
                               .ToList();
 
             return View(new ListadoViewModel<TipoHabitacionModel, FiltroBase> { Items = items, Filtro = filtro, Total = tipos.Count });

@@ -12,10 +12,9 @@ namespace SGRH.BL.Services
         Task<OperationResult<bool>> UpdateAsync(UsuarioUpdate usuario);
         Task<OperationResult<bool>> RemoveAsync(UsuarioRemove usuario);
 
-        /// <summary>Inicio de sesión del personal del hotel.</summary>
         Task<OperationResult<UsuarioModel>> LoginAsync(string nombreUsuario, string clave);
+        Task<OperationResult<UsuarioModel>> RegistrarClienteAsync(ClienteRegistro registro);
 
-        /// <summary>RNF-001: ¿el usuario puede realizar esta acción?</summary>
         Task<OperationResult<bool>> TienePermisoAsync(int usuarioId, string accion);
     }
 }

@@ -35,7 +35,6 @@ namespace SGRH.BL.Tests.Services
             await service.RegistrarResultadoEnvioAsync(n1.Data!.NotificacionId, false, "Servidor caído");
             await service.RegistrarResultadoEnvioAsync(n2.Data!.NotificacionId, false, "Servidor caído");
 
-            // Simula un envío que funciona para la primera y falla para la segunda.
             var resultado = await service.ReintentarFallidasAsync(n => Task.FromResult(n.Mensaje == "Uno"));
 
             var pendientes = await service.GetPendientesDeReintentoAsync();

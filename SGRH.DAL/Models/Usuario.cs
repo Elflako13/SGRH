@@ -2,7 +2,6 @@ using SGRH.DAL.Models.Base;
 
 namespace SGRH.DAL.Models
 {
-    /// <summary>Persona que usa el sistema (Administrador, Recepcionista u Operaciones).</summary>
     public sealed class Usuario : AuditEntity
     {
         public string NombreUsuario { get; set; } = string.Empty;
@@ -10,6 +9,9 @@ namespace SGRH.DAL.Models
         public string? Correo { get; set; }
         public string ClaveHash { get; set; } = string.Empty;
         public Rol Rol { get; set; }
+
+        public int? HuespedId { get; set; }
+        public Huesped? Huesped { get; set; }
 
         private static readonly string[] PermisosRecepcion =
         {
@@ -19,13 +21,11 @@ namespace SGRH.DAL.Models
             Permisos.ConsultarHistorial
         };
 
-        /// <summary>RNF-001: indica si el rol del usuario permite realizar la acción.</summary>
         public bool TienePermiso(string accion)
         {
             return Estatus && PuedeRealizar(Rol, accion);
         }
 
-        /// <summary>RNF-001: acciones permitidas para cada rol.</summary>
         public static bool PuedeRealizar(Rol rol, string accion)
         {
             return rol switch
@@ -34,6 +34,7 @@ namespace SGRH.DAL.Models
                 Rol.Recepcionista => PermisosRecepcion.Contains(accion),
                 Rol.Operaciones => accion == Permisos.CambiarEstadoHabitacion
                                    || accion == Permisos.ConsultarEstructura,
+                Rol.Cliente => accion == Permisos.ReservarEnLinea,
                 _ => false
             };
         }

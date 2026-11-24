@@ -5,7 +5,6 @@ using SGRH.DAL.Repositories;
 
 namespace SGRH.BL.Services
 {
-    /// <summary>Gestión de hoteles (CU-001, RF-001, RF-002).</summary>
     public class HotelService : ServiceBase, IHotelService
     {
         private readonly IHotelRepository hotelRepository;

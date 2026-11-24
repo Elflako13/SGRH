@@ -8,6 +8,8 @@ namespace SGRH.DAL.Models.Objects.Reserva
         public string Huesped { get; set; } = string.Empty;
         public int HabitacionId { get; set; }
         public string Habitacion { get; set; } = string.Empty;
+        public string Hotel { get; set; } = string.Empty;
+        public string TipoHabitacion { get; set; } = string.Empty;
         public DateOnly FechaEntrada { get; set; }
         public DateOnly FechaSalida { get; set; }
         public int Noches => FechaSalida.DayNumber - FechaEntrada.DayNumber;

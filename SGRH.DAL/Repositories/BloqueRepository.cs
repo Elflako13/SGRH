@@ -91,7 +91,6 @@ namespace SGRH.DAL.Repositories
                 if (entity is null)
                     return Failure<bool>("El bloque no existe.");
 
-                // El bloque no cambia de hotel, igual que el piso (RN-002).
                 if (entity.HotelId != bloque.HotelId)
                     return Failure<bool>("Un bloque no puede trasladarse a otro hotel.");
 

@@ -1,0 +1,12 @@
+@model (int Cantidad, string? VerUrl, string? AgregarUrl)
+<div class="conteo">
+    <b>@Model.Cantidad</b>
+    @if (Model.VerUrl is not null)
+    {
+        <a class="enlace-mini" href="@Model.VerUrl">Ver</a>
+    }
+    @if (Model.AgregarUrl is not null)
+    {
+        <a class="enlace-mini" href="@Model.AgregarUrl">+ Agregar</a>
+    }
+</div>

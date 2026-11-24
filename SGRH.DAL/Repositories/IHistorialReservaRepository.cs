@@ -3,7 +3,6 @@ using SGRH.DAL.Models.Result;
 
 namespace SGRH.DAL.Repositories
 {
-    /// <summary>Bitácora de reservas (RF-021, RNF-007): solo se agregan y consultan registros.</summary>
     public interface IHistorialReservaRepository
     {
         Task<OperationResult<bool>> AddAsync(HistorialReservaAdd historial);

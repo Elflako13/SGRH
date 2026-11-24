@@ -1,8 +1,3 @@
-/* =============================================================================
-   SGRH - Sistema de Gestión de Reservas de Hoteles
-   Script de creación de la base de datos con datos de prueba.
-   OJO: si la base de datos SGRH ya existe, se elimina y se vuelve a crear.
-   ============================================================================= */
 USE [master];
 GO
 
@@ -74,22 +69,6 @@ CREATE TABLE [Configuration].[TipoHabitacion] (
 );
 GO
 
-CREATE TABLE [Security].[Usuario] (
-    [Id] int NOT NULL IDENTITY,
-    [NombreUsuario] nvarchar(50) NOT NULL,
-    [NombreCompleto] nvarchar(150) NOT NULL,
-    [Correo] nvarchar(150) NULL,
-    [ClaveHash] nvarchar(256) NOT NULL,
-    [Rol] int NOT NULL,
-    [FechaCreacion] datetime2 NOT NULL,
-    [UsuarioCreacion] int NULL,
-    [FechaModificacion] datetime2 NULL,
-    [UsuarioModificacion] int NULL,
-    [Estatus] bit NOT NULL,
-    CONSTRAINT [PK_Usuario] PRIMARY KEY ([Id])
-);
-GO
-
 CREATE TABLE [Configuration].[Hotel] (
     [Id] int NOT NULL IDENTITY,
     [Nombre] nvarchar(150) NOT NULL,
@@ -106,6 +85,24 @@ CREATE TABLE [Configuration].[Hotel] (
     [Estatus] bit NOT NULL,
     CONSTRAINT [PK_Hotel] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_Hotel_CadenaHotelera_CadenaHoteleraId] FOREIGN KEY ([CadenaHoteleraId]) REFERENCES [Configuration].[CadenaHotelera] ([Id]) ON DELETE NO ACTION
+);
+GO
+
+CREATE TABLE [Security].[Usuario] (
+    [Id] int NOT NULL IDENTITY,
+    [NombreUsuario] nvarchar(50) NOT NULL,
+    [NombreCompleto] nvarchar(150) NOT NULL,
+    [Correo] nvarchar(150) NULL,
+    [ClaveHash] nvarchar(256) NOT NULL,
+    [Rol] int NOT NULL,
+    [HuespedId] int NULL,
+    [FechaCreacion] datetime2 NOT NULL,
+    [UsuarioCreacion] int NULL,
+    [FechaModificacion] datetime2 NULL,
+    [UsuarioModificacion] int NULL,
+    [Estatus] bit NOT NULL,
+    CONSTRAINT [PK_Usuario] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Usuario_Huesped_HuespedId] FOREIGN KEY ([HuespedId]) REFERENCES [Reservation].[Huesped] ([Id]) ON DELETE NO ACTION
 );
 GO
 
@@ -265,21 +262,26 @@ GO
 CREATE UNIQUE INDEX [IX_TipoHabitacion_Nombre] ON [Configuration].[TipoHabitacion] ([Nombre]);
 GO
 
+CREATE UNIQUE INDEX [IX_Usuario_HuespedId] ON [Security].[Usuario] ([HuespedId]) WHERE [HuespedId] IS NOT NULL;
+GO
+
 CREATE UNIQUE INDEX [IX_Usuario_NombreUsuario] ON [Security].[Usuario] ([NombreUsuario]);
 GO
 
-
-/* ------------------------------ Datos de prueba ------------------------------ */
-
 DECLARE @Ahora DATETIME2 = SYSDATETIME();
 
--- Security: usuarios (Rol: 1 = Administrador, 2 = Recepcionista, 3 = Operaciones)
-INSERT INTO [Security].[Usuario] (NombreUsuario, NombreCompleto, Correo, ClaveHash, Rol, FechaCreacion, Estatus)
-VALUES (N'admin',       N'Administrador del sistema', N'admin@sgrh.com',       CONVERT(NVARCHAR(256), HASHBYTES('SHA2_256', N'Admin123*'), 2), 1, @Ahora, 1),
-       (N'recepcion',   N'Recepcionista de turno',    N'recepcion@sgrh.com',   CONVERT(NVARCHAR(256), HASHBYTES('SHA2_256', N'Recep123*'), 2), 2, @Ahora, 1),
-       (N'operaciones', N'Personal de operaciones',   N'operaciones@sgrh.com', CONVERT(NVARCHAR(256), HASHBYTES('SHA2_256', N'Oper123*'),  2), 3, @Ahora, 1);
+INSERT INTO [Reservation].[Huesped] (Nombre, Apellido, Documento, Correo, Telefono, FechaCreacion, Estatus)
+VALUES (N'Ana', N'Pérez', N'001-0000000-1', N'ana.perez@correo.com', N'809-555-0123', @Ahora, 1);
+DECLARE @AnaId INT = SCOPE_IDENTITY();
 
--- Configuration: tipos de habitación
+INSERT INTO [Security].[Usuario] (NombreUsuario, NombreCompleto, Correo, ClaveHash, Rol, HuespedId, FechaCreacion, Estatus)
+VALUES (N'admin',                N'Administrador del sistema', N'admin@sgrh.com',       CONVERT(NVARCHAR(256), HASHBYTES('SHA2_256', 'Admin123*'), 2),   1, NULL,   @Ahora, 1),
+       (N'recepcion',            N'Recepcionista de turno',    N'recepcion@sgrh.com',   CONVERT(NVARCHAR(256), HASHBYTES('SHA2_256', 'Recep123*'), 2),   2, NULL,   @Ahora, 1),
+       (N'operaciones',          N'Personal de operaciones',   N'operaciones@sgrh.com', CONVERT(NVARCHAR(256), HASHBYTES('SHA2_256', 'Oper123*'), 2),    3, NULL,   @Ahora, 1),
+       (N'ana.perez@correo.com', N'Ana Pérez',                 N'ana.perez@correo.com', CONVERT(NVARCHAR(256), HASHBYTES('SHA2_256', 'Cliente123*'), 2), 4, @AnaId, @Ahora, 1);
+
+
+
 INSERT INTO [Configuration].[TipoHabitacion] (Nombre, Descripcion, TarifaBase, FechaCreacion, UsuarioCreacion, Estatus)
 VALUES (N'Sencilla', N'Una cama individual, ideal para una persona.',          1800.00, @Ahora, 1, 1),
        (N'Doble',    N'Dos camas o una cama matrimonial para dos personas.',  2500.00, @Ahora, 1, 1),
@@ -291,7 +293,6 @@ DECLARE @Doble    INT = (SELECT Id FROM [Configuration].[TipoHabitacion] WHERE N
 DECLARE @Familiar INT = (SELECT Id FROM [Configuration].[TipoHabitacion] WHERE Nombre = N'Familiar');
 DECLARE @Suite    INT = (SELECT Id FROM [Configuration].[TipoHabitacion] WHERE Nombre = N'Suite');
 
--- Configuration: cadena y hoteles
 INSERT INTO [Configuration].[CadenaHotelera] (Nombre, RNC, FechaCreacion, Estatus)
 VALUES (N'Cadena Caribe Hoteles', N'130000001', @Ahora, 1);
 DECLARE @CadenaId INT = SCOPE_IDENTITY();
@@ -305,7 +306,6 @@ DECLARE @HotelSD INT = (SELECT Id FROM [Configuration].[Hotel] WHERE Nombre = N'
 DECLARE @HotelPC INT = (SELECT Id FROM [Configuration].[Hotel] WHERE Nombre = N'Hotel Bahía Punta Cana');
 DECLARE @HotelST INT = (SELECT Id FROM [Configuration].[Hotel] WHERE Nombre = N'Hotel Cibao Santiago');
 
--- Configuration: bloques (torres o edificios de cada hotel)
 INSERT INTO [Configuration].[Bloque] (Nombre, Descripcion, HotelId, FechaCreacion, UsuarioCreacion, Estatus)
 VALUES (N'Torre A',         N'Torre principal frente al malecón.', @HotelSD, @Ahora, 1, 1),
        (N'Torre B',         N'Torre ejecutiva.',                   @HotelSD, @Ahora, 1, 1),
@@ -317,13 +317,11 @@ DECLARE @TorreB  INT = (SELECT Id FROM [Configuration].[Bloque] WHERE HotelId = 
 DECLARE @Playa   INT = (SELECT Id FROM [Configuration].[Bloque] WHERE HotelId = @HotelPC AND Nombre = N'Edificio Playa');
 DECLARE @Jardin  INT = (SELECT Id FROM [Configuration].[Bloque] WHERE HotelId = @HotelPC AND Nombre = N'Edificio Jardín');
 
--- Configuration: pisos (el bloque es opcional)
 INSERT INTO [Configuration].[Piso] (Numero, HotelId, BloqueId, FechaCreacion, UsuarioCreacion, Estatus)
 VALUES (1, @HotelSD, @TorreA, @Ahora, 1, 1), (2, @HotelSD, @TorreA, @Ahora, 1, 1), (3, @HotelSD, @TorreB, @Ahora, 1, 1),
        (1, @HotelPC, @Playa,  @Ahora, 1, 1), (2, @HotelPC, @Playa,  @Ahora, 1, 1), (3, @HotelPC, @Jardin, @Ahora, 1, 1),
        (1, @HotelST, NULL,    @Ahora, 1, 1), (2, @HotelST, NULL,    @Ahora, 1, 1);
 
--- Configuration: habitaciones (Estado: 1 = Disponible, 2 = Limpieza, 3 = Mantenimiento, 4 = Fuera de servicio, 5 = Inactiva)
 INSERT INTO [Configuration].[Habitacion] (Numero, TipoHabitacionId, Capacidad, TarifaPorNoche, Estado, PisoId, HotelId, FechaCreacion, UsuarioCreacion, Estatus)
 SELECT h.Numero, h.TipoId, h.Capacidad, h.Tarifa, h.Estado, p.Id, p.HotelId, @Ahora, 1, 1
 FROM (VALUES
@@ -342,7 +340,5 @@ FROM (VALUES
      ) AS h(HotelId, NumeroPiso, Numero, TipoId, Capacidad, Tarifa, Estado)
 JOIN [Configuration].[Piso] p ON p.HotelId = h.HotelId AND p.Numero = h.NumeroPiso;
 
--- Reservation: huésped de ejemplo
-INSERT INTO [Reservation].[Huesped] (Nombre, Apellido, Documento, Correo, Telefono, FechaCreacion, Estatus)
-VALUES (N'Ana', N'Pérez', N'001-0000000-1', N'ana.perez@correo.com', N'809-555-0123', @Ahora, 1);
+
 GO

@@ -1,11 +1,9 @@
 @model HotelModel
-@* Tarjeta de un hotel. La usan el panel de inicio y el listado de hoteles. *@
 @{
-    var palabras = Model.Nombre.Replace("Hotel ", "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-    var iniciales = string.Concat(palabras.Take(2).Select(p => char.ToUpper(p[0])));
+    var iniciales = Formato.Iniciales(Model.Nombre);
     bool conAcciones = ViewContext.RouteData.Values["controller"]?.ToString() == "Hoteles";
 }
-<div class="panel hotel-card cat-@Model.Estrellas">
+<div class="panel hotel-card cat-@Model.Estrellas" data-id="@Model.HotelId">
     <div class="panel-cuerpo">
         <div class="hotel-cabecera">
             <span class="hotel-inicial">@iniciales</span>
@@ -21,9 +19,9 @@
         <partial name="_Estrellas" model="Model.Estrellas" />
         <p class="hotel-dir">@Model.Direccion · @Model.Telefono</p>
         <div class="hotel-datos">
-            <span><b>@Model.CantidadBloques</b>bloques</span>
-            <span><b>@Model.CantidadPisos</b>pisos</span>
-            <span><b>@Model.CantidadHabitaciones</b>habitaciones</span>
+            <a asp-controller="Bloques" asp-action="Index" asp-route-HotelId="@Model.HotelId" title="Ver los bloques de este hotel"><b>@Model.CantidadBloques</b>bloques</a>
+            <a asp-controller="Pisos" asp-action="Index" asp-route-HotelId="@Model.HotelId" title="Ver los pisos de este hotel"><b>@Model.CantidadPisos</b>pisos</a>
+            <a asp-controller="Habitaciones" asp-action="Index" asp-route-HotelId="@Model.HotelId" title="Ver las habitaciones de este hotel"><b>@Model.CantidadHabitaciones</b>habitaciones</a>
         </div>
         @if (conAcciones)
         {

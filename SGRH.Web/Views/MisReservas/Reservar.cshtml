@@ -1,0 +1,34 @@
+@model ReservarViewModel
+@{
+    ViewData["Title"] = "Confirmar reserva";
+    var h = Model.Habitacion!;
+}
+<section class="auth">
+    <div class="panel auth-card ancho">
+        <div class="panel-cuerpo">
+            <h1>Confirmar reserva</h1>
+            <p class="resumen">Revise los datos antes de reservar.</p>
+
+            <div class="resumen-reserva">
+                <div><span>Hotel</span><b>@h.Hotel</b></div>
+                <div><span>Habitación</span><b>@h.Tipo · Piso @h.NumeroPiso · N.º @h.Numero</b></div>
+                <div><span>Llegada</span><b>@Model.Entrada.ToString("dddd d 'de' MMMM, yyyy")</b></div>
+                <div><span>Salida</span><b>@Model.Salida.ToString("dddd d 'de' MMMM, yyyy")</b></div>
+                <div><span>Huéspedes</span><b>@Model.Huespedes</b></div>
+                <div><span>Tarifa</span><b>@Formato.Moneda(h.TarifaPorNoche) × @Model.Noches noche(s)</b></div>
+                <div class="total"><span>Total</span><b>@Formato.Moneda(Model.Total)</b></div>
+            </div>
+
+            <form method="post" asp-action="Reservar">
+                <input type="hidden" asp-for="HabitacionId" />
+                <input type="hidden" name="Entrada" value="@Model.Entrada.ToString("yyyy-MM-dd")" />
+                <input type="hidden" name="Salida" value="@Model.Salida.ToString("yyyy-MM-dd")" />
+                <input type="hidden" asp-for="Huespedes" />
+                <div class="form-pie">
+                    <a class="btn-app btn-secundario" asp-controller="Home" asp-action="Hotel" asp-route-id="@h.HotelId">Volver</a>
+                    <button type="submit" class="btn-app btn-dorado">Confirmar reserva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

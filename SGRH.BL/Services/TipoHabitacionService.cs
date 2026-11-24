@@ -5,7 +5,6 @@ using SGRH.DAL.Repositories;
 
 namespace SGRH.BL.Services
 {
-    /// <summary>Mantenimiento del catálogo de tipos de habitación.</summary>
     public class TipoHabitacionService : ServiceBase, ITipoHabitacionService
     {
         private readonly ITipoHabitacionRepository tipoRepository;

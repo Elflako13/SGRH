@@ -1,6 +1,5 @@
 namespace SGRH.DAL.Models.Objects.Habitacion
 {
-    /// <summary>Resultado de la consulta de disponibilidad (CU-009).</summary>
     public class HabitacionDisponibleModel
     {
         public int HabitacionId { get; set; }

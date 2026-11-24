@@ -23,8 +23,8 @@
     </div></div>
 
     <div class="panel"><div class="panel-cuerpo">
-        <h2 class="panel-titulo">Cambiar estado operativo (CU-005)</h2>
-        <p class="resumen">Una habitación en mantenimiento, fuera de servicio o inactiva no se puede reservar (RN-007). Si tiene reservas activas futuras, primero hay que reubicarlas o cancelarlas (RN-018).</p>
+        <h2 class="panel-titulo">Cambiar estado operativo</h2>
+        <p class="resumen">Una habitación en mantenimiento, fuera de servicio o inactiva no se puede reservar. Si tiene reservas activas futuras, primero hay que reubicarlas o cancelarlas.</p>
         <form method="post" asp-action="CambiarEstado" asp-route-id="@Model.HabitacionId">
             <input type="hidden" name="volverA" value="@Context.Request.Path" />
             <div class="form-campo">

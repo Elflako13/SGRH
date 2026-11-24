@@ -5,7 +5,6 @@ using SGRH.DAL.Models.Objects.Piso;
 
 namespace SGRH.Web.Models
 {
-    /// <summary>Estructura completa de un hotel (CU-006): bloques, pisos y habitaciones.</summary>
     public class HotelDetalleViewModel
     {
         public HotelModel Hotel { get; set; } = default!;

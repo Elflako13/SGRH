@@ -4,6 +4,7 @@ namespace SGRH.DAL.Models
     {
         Confirmacion = 1,
         Modificacion = 2,
-        Cancelacion = 3
+        Cancelacion = 3,
+        Creacion = 4
     }
 }

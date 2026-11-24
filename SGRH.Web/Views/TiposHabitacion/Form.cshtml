@@ -5,6 +5,13 @@
     ViewData["Descripcion"] = "El nombre del tipo no se puede repetir.";
 }
 <partial name="_Encabezado" />
+@if (!Model.EsNuevo)
+{
+    <partial name="_Atajos" model='new (string, string?, string)[]
+    {
+        ("Habitaciones de este tipo", Url.Action("Index", "Habitaciones", new { TipoHabitacionId = Model.Id }), "habitacion")
+    }' />
+}
 
 <div class="panel form-contenedor">
     <form method="post" asp-action="@(Model.EsNuevo ? "Create" : "Edit")" asp-route-id="@(Model.EsNuevo ? null : Model.Id)" class="panel-cuerpo">

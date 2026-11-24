@@ -1,0 +1,89 @@
+@model HotelPublicoViewModel
+@{
+    var h = Model.Hotel;
+    var b = Model.Busqueda;
+    ViewData["Title"] = h.Nombre;
+}
+<section class="hotel-cabecera-publica">
+    <div class="sitio-interior">
+        <a class="volver" asp-action="Index">← Todos los hoteles</a>
+        <span class="hotel-ciudad">@h.Ciudad</span>
+        <h1>@h.Nombre</h1>
+        <partial name="_Estrellas" model="h.Estrellas" />
+        <p>@h.Direccion · @h.Telefono · @h.Correo</p>
+    </div>
+</section>
+
+<section class="sitio-interior sitio-seccion">
+    <div class="panel reserva-caja">
+        <form method="get" asp-action="Hotel" asp-route-id="@h.HotelId" class="buscador en-hotel">
+            <input type="hidden" name="verDisponibilidad" value="true" />
+            <div class="buscador-campo">
+                <label for="Entrada">Llegada</label>
+                <input id="Entrada" name="Entrada" type="date" class="control" value="@b.Entrada.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="buscador-campo">
+                <label for="Salida">Salida</label>
+                <input id="Salida" name="Salida" type="date" class="control" value="@b.Salida.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="buscador-campo chico">
+                <label for="Huespedes">Huéspedes</label>
+                <input id="Huespedes" name="Huespedes" type="number" min="1" max="20" class="control" value="@b.Huespedes" />
+            </div>
+            <button type="submit" class="btn-app btn-primario buscador-boton">Ver disponibilidad</button>
+        </form>
+    </div>
+
+    @if (Model.Error is not null)
+    {
+        <div class="alerta alerta-error">✕ @Model.Error</div>
+    }
+
+    @if (Model.Disponibles is not null)
+    {
+        <h2 class="sitio-titulo">Habitaciones disponibles</h2>
+        <p class="resumen">@b.Entrada.ToString("dd/MM/yyyy") → @b.Salida.ToString("dd/MM/yyyy") · @b.Noches noche(s) · @b.Huespedes huésped(es)</p>
+        @if (!Model.Disponibles.Any())
+        {
+            <div class="panel"><partial name="_Vacio" model="@("No hay habitaciones disponibles para esas fechas. Pruebe con otras fechas o con menos huéspedes.")" /></div>
+        }
+        <div class="lista-resultados">
+            @foreach (var hab in Model.Disponibles)
+            {
+                <div class="panel resultado">
+                    <div class="habitacion-icono"><partial name="_Icono" model="@("habitacion")" /></div>
+                    <div class="resultado-info">
+                        <span class="hotel-nombre">Habitación @hab.Tipo</span>
+                        <span class="hotel-dir">Hasta @hab.Capacidad persona(s) · Piso @hab.Piso · Habitación @hab.Numero</span>
+                        <span class="hotel-dir">@Formato.Moneda(hab.TarifaPorNoche) por noche</span>
+                    </div>
+                    <div class="resultado-precio">
+                        <span>@hab.Noches noche(s)</span>
+                        <span class="total-grande">@Formato.Moneda(hab.CostoEstimado)</span>
+                        <a class="btn-app btn-dorado" asp-controller="MisReservas" asp-action="Reservar"
+                           asp-route-HabitacionId="@hab.HabitacionId" asp-route-Entrada="@b.Entrada.ToString("yyyy-MM-dd")"
+                           asp-route-Salida="@b.Salida.ToString("yyyy-MM-dd")" asp-route-Huespedes="@b.Huespedes">Reservar</a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <h2 class="sitio-titulo">Habitaciones de este hotel</h2>
+        <p class="resumen">Elija las fechas arriba para ver la disponibilidad y el precio total.</p>
+        <div class="grid-tipos">
+            @foreach (var t in Model.Tipos)
+            {
+                <div class="panel tipo-card">
+                    <div class="panel-cuerpo">
+                        <span class="tipo-nombre">@t.Nombre</span>
+                        <p>@t.Descripcion</p>
+                        <span class="hotel-dir">Hasta @t.CapacidadMaxima persona(s)</span>
+                        <span class="tipo-precio">Desde <b>@Formato.Moneda(t.Desde)</b> / noche</span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>

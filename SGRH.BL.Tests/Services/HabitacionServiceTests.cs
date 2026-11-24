@@ -73,7 +73,6 @@ namespace SGRH.BL.Tests.Services
 
             var resultado = await service.GetDisponiblesAsync(datos.HotelId, Hoy.AddDays(5), Hoy.AddDays(7), 1);
 
-            // 102 (1,800), 101 (2,500) y 201 (6,000)
             Assert.True(resultado.Success);
             Assert.Equal(new[] { "102", "101", "201" }, resultado.Data!.Select(h => h.Numero));
         }

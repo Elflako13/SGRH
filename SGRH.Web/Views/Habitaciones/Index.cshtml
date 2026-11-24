@@ -48,7 +48,7 @@
             <tbody>
                 @foreach (var h in Model.Items)
                 {
-                    <tr>
+                    <tr data-id="@h.HabitacionId">
                         <td><b>@h.Numero</b></td>
                         <td>@h.Hotel<span class="sub">Piso @h.NumeroPiso@(h.Bloque is null ? "" : $" · {h.Bloque}")</span></td>
                         <td>@h.Tipo</td>

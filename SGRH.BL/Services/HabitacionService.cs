@@ -9,7 +9,6 @@ using static SGRH.DAL.Models.Result.OperationResult;
 
 namespace SGRH.BL.Services
 {
-    /// <summary>Gestión de habitaciones (CU-003 a CU-005) y consulta de disponibilidad (CU-009).</summary>
     public class HabitacionService : ServiceBase, IHabitacionService
     {
         private readonly IHabitacionRepository habitacionRepository;
@@ -49,17 +48,11 @@ namespace SGRH.BL.Services
                           () => Requerido(habitacion, nameof(HabitacionRemove)) ?? ValidarId(habitacion.Id, "habitación"),
                           () => habitacionRepository.RemoveAsync(habitacion), habitacion?.UsuarioModificacion);
 
-        /// <summary>CU-005: cambia el estado operativo (RF-007, RN-007, RN-018).</summary>
         public Task<OperationResult<bool>> CambiarEstadoAsync(int habitacionId, EstadoHabitacion estado, int? usuarioModificacion) =>
             EjecutarAsync("cambiar estado de habitación",
                           () => ValidarId(habitacionId, "habitación") ?? (Enum.IsDefined(estado) ? null : "El estado indicado no es válido."),
                           () => habitacionRepository.CambiarEstadoAsync(habitacionId, estado, usuarioModificacion), usuarioModificacion);
 
-        /// <summary>
-        /// CU-009: consulta de disponibilidad. Antes de ir a la base de datos aplica las reglas
-        /// de la solicitud (RN-009, RN-011 y los límites de ReservaOptions) y devuelve las
-        /// habitaciones ordenadas de la más económica a la más cara.
-        /// </summary>
         public Task<OperationResult<List<HabitacionDisponibleModel>>> GetDisponiblesAsync(int hotelId, DateOnly entrada, DateOnly salida, int cantidadHuespedes) =>
             EjecutarAsync("consultar disponibilidad", () => ValidarSolicitud(entrada, salida, cantidadHuespedes), async () =>
             {

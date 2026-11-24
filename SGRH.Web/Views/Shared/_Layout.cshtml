@@ -3,58 +3,64 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] · SGRH</title>
+    <title>@ViewData["Title"] · Caribe Hoteles</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body>
+<body class="sitio">
     @{
         var controlador = ViewContext.RouteData.Values["controller"]?.ToString();
-        string Activo(string nombre) => controlador == nombre ? "activo" : "";
+        var actual = Context.Request.Path + Context.Request.QueryString;
     }
-    <div class="app">
-        <header class="barra-superior">
-            <div class="barra-interior">
-                <a class="brand" asp-controller="Home" asp-action="Index">
-                    <span class="brand-logo">H</span>
-                    <span class="brand-nombre">SGRH <span class="brand-sub">· Reservas de Hoteles</span></span>
-                </a>
+    <header class="sitio-barra">
+        <div class="sitio-interior">
+            <a class="sitio-marca" asp-controller="Home" asp-action="Index">
+                <span class="brand-logo">C</span>
+                <span>Caribe <b>Hoteles</b></span>
+            </a>
 
-                <nav class="menu">
-                    <a class="@Activo("Home")" asp-controller="Home" asp-action="Index"><partial name="_Icono" model="@("inicio")" /> Inicio</a>
-                    <a class="@Activo("Hoteles")" asp-controller="Hoteles" asp-action="Index"><partial name="_Icono" model="@("hotel")" /> Hoteles</a>
-                    <a class="@Activo("Bloques")" asp-controller="Bloques" asp-action="Index"><partial name="_Icono" model="@("bloque")" /> Bloques</a>
-                    <a class="@Activo("Pisos")" asp-controller="Pisos" asp-action="Index"><partial name="_Icono" model="@("piso")" /> Pisos</a>
-                    <a class="@Activo("Habitaciones")" asp-controller="Habitaciones" asp-action="Index"><partial name="_Icono" model="@("habitacion")" /> Habitaciones</a>
-                    <a class="@Activo("TiposHabitacion")" asp-controller="TiposHabitacion" asp-action="Index"><partial name="_Icono" model="@("tipo")" /> Tipos de habitación</a>
-                </nav>
+            <nav class="sitio-menu">
+                <a class="@(controlador == "Home" ? "activo" : "")" asp-controller="Home" asp-action="Index">Hoteles</a>
+                @if (User.IsInRole("Cliente"))
+                {
+                    <a class="@(controlador == "MisReservas" ? "activo" : "")" asp-controller="MisReservas" asp-action="Index">Mis reservas</a>
+                }
+                @if (User.IsInRole("Administrador"))
+                {
+                    <a asp-controller="Panel" asp-action="Index">Administración</a>
+                }
+            </nav>
 
-                <div class="usuario-chip">
-                    <span>Administrador</span>
-                    <span class="avatar">A</span>
-                </div>
+            <div class="sitio-cuenta">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <span class="sitio-usuario"><span class="avatar">@User.Identity.Name?[0]</span> @User.Identity.Name</span>
+                    <form method="post" asp-controller="Cuenta" asp-action="Salir" style="margin:0">
+                        <button type="submit" class="btn-app btn-secundario btn-chico">Salir</button>
+                    </form>
+                }
+                else
+                {
+                    <a class="btn-app btn-secundario btn-chico" asp-controller="Cuenta" asp-action="Ingresar" asp-route-returnUrl="@actual">Iniciar sesión</a>
+                    <a class="btn-app btn-primario btn-chico" asp-controller="Cuenta" asp-action="Registro" asp-route-returnUrl="@actual">Crear cuenta</a>
+                }
             </div>
-        </header>
-
-        <div class="main">
-            <main class="content">
-                <div class="migas">
-                    <a asp-controller="Home" asp-action="Index">Inicio</a>
-                    @if (ViewData["Seccion"] is string seccion)
-                    {
-                        <span> › </span><a asp-action="Index">@seccion</a>
-                    }
-                    @if (controlador != "Home")
-                    {
-                        <span> › @ViewData["Title"]</span>
-                    }
-                </div>
-                <partial name="_Alertas" />
-                @RenderBody()
-            </main>
         </div>
+    </header>
 
-        <footer class="pie">SGRH · Sistema de Gestión de Reservas de Hoteles · 2026</footer>
-    </div>
+    <main class="sitio-contenido">
+        <div class="sitio-alertas"><partial name="_Alertas" /></div>
+        @RenderBody()
+    </main>
+
+    <footer class="sitio-pie">
+        <div class="sitio-interior">
+            <div>
+                <b>Caribe Hoteles</b><br />
+                Hoteles en Santo Domingo, Punta Cana, Santiago y más.
+            </div>
+            <div>Reservas: 809-555-0100 · reservas@caribehoteles.com</div>
+        </div>
+    </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -7,5 +7,6 @@ namespace SGRH.DAL.Models.Objects.Usuario
         public string NombreCompleto { get; set; } = string.Empty;
         public string? Correo { get; set; }
         public Rol Rol { get; set; }
+        public int? HuespedId { get; set; }
     }
 }

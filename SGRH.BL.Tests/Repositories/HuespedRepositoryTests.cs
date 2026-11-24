@@ -10,7 +10,7 @@ namespace SGRH.BL.Tests.Repositories
         public async Task Add_DocumentoRepetido_Falla_RN017()
         {
             using var db = new TestDatabase();
-            db.Sembrar(); // ya existe el documento 001-0000000-1
+            db.Sembrar();
             using var context = db.CrearContexto();
 
             var resultado = await new HuespedRepository(context).AddAsync(new HuespedAdd { Nombre = "Luis", Apellido = "Gómez", Documento = "001-0000000-1", Telefono = "809-555-0000" });

@@ -1,9 +1,5 @@
-/* =========================================================
-   SGRH - Estilos de la capa de presentación
-   ========================================================= */
 :root {
-    --marca-900: #14213d;   /* azul marino */
-    --marca-800: #1c2d52;
+    --marca-900: #14213d;   --marca-800: #1c2d52;
     --marca-700: #24396a;
     --marca-600: #2f4b8a;
     --marca-500: #3d63b8;
@@ -27,7 +23,6 @@
 
 * { box-sizing: border-box; }
 
-/* Tamaño por defecto de los íconos; cada componente lo ajusta más abajo. */
 svg { width: 1.15em; height: 1.15em; flex-shrink: 0; }
 
 html { font-size: 15px; }
@@ -42,7 +37,6 @@ body {
 a { color: var(--marca-600); text-decoration: none; }
 a:hover { color: var(--marca-700); }
 
-/* ---------- Estructura general: barra superior ---------- */
 .app { min-height: 100vh; display: flex; flex-direction: column; }
 
 .barra-superior { background: var(--marca-900); color: #fff; border-bottom: 3px solid var(--dorado); }
@@ -82,13 +76,11 @@ a:hover { color: var(--marca-700); }
 
 .pie { padding: 16px 32px; font-size: .8rem; color: var(--texto-suave); border-top: 1px solid var(--borde); text-align: center; background: var(--blanco); }
 
-/* ---------- Encabezado de página ---------- */
 .encabezado { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
 .encabezado h1 { font-size: 1.55rem; font-weight: 700; margin: 0 0 4px; font-family: Georgia, "Times New Roman", serif; color: var(--marca-900); }
 .encabezado h1::after { content: ""; display: block; width: 44px; height: 3px; background: var(--dorado); margin-top: 8px; }
 .encabezado p { margin: 0; color: var(--texto-suave); }
 
-/* ---------- Botones ---------- */
 .btn-app {
     display: inline-flex; align-items: center; gap: 8px;
     border: 1px solid transparent; border-radius: 10px;
@@ -108,7 +100,6 @@ a:hover { color: var(--marca-700); }
 .acciones { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
 .acciones form { margin: 0; }
 
-/* ---------- Tarjetas y paneles ---------- */
 .panel {
     background: var(--blanco);
     border: 1px solid var(--borde);
@@ -118,7 +109,6 @@ a:hover { color: var(--marca-700); }
 .panel-cuerpo { padding: 22px; }
 .panel-titulo { font-size: 1rem; font-weight: 700; margin: 0 0 14px; }
 
-/* ---------- Filtros ---------- */
 .filtros {
     display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
     padding: 14px; margin-bottom: 16px;
@@ -143,7 +133,6 @@ a:hover { color: var(--marca-700); }
 
 .resumen { font-size: .84rem; color: var(--texto-suave); margin: 0 0 10px; }
 
-/* ---------- Tabla ---------- */
 .tabla { width: 100%; border-collapse: collapse; }
 .tabla th {
     text-align: left; font-size: .74rem; text-transform: uppercase; letter-spacing: .05em;
@@ -156,7 +145,6 @@ a:hover { color: var(--marca-700); }
 .tabla .sub { display: block; font-size: .8rem; color: var(--texto-suave); }
 .tabla-contenedor { overflow-x: auto; }
 
-/* ---------- Etiquetas de estado ---------- */
 .badge-app { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: .78rem; font-weight: 600; white-space: nowrap; }
 .badge-app::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .badge-ok { background: var(--ok-bg); color: var(--ok); }
@@ -168,13 +156,11 @@ a:hover { color: var(--marca-700); }
 .estrellas { color: #d9a400; letter-spacing: 1px; white-space: nowrap; }
 .estrellas .apagada { color: #d9dedc; }
 
-/* ---------- Alertas ---------- */
 .alerta { display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; border-radius: 12px; margin-bottom: 18px; font-size: .92rem; }
 .alerta-exito { background: var(--ok-bg); color: var(--marca-700); border: 1px solid #c7e4d8; }
 .alerta-error { background: var(--danger-bg); color: var(--danger); border: 1px solid #f0cfcc; }
 .alerta ul { margin: 0; padding-left: 18px; }
 
-/* ---------- Tarjetas de hotel ---------- */
 .grid-hoteles { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
 .hotel-card { display: flex; flex-direction: column; border-top: 4px solid var(--marca-600); }
 .hotel-card.cat-5 { border-top-color: var(--dorado); }
@@ -192,7 +178,6 @@ a:hover { color: var(--marca-700); }
 .hotel-datos { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; font-size: .75rem; color: var(--texto-suave); padding: 10px 0; border-top: 1px solid var(--borde); border-bottom: 1px solid var(--borde); margin-top: auto; }
 .hotel-datos b { display: block; font-size: 1.15rem; color: var(--marca-900); }
 
-/* ---------- Panel de inicio ---------- */
 .bienvenida {
     background: var(--marca-900); color: #fff; border-radius: var(--radio);
     padding: 22px 26px; margin-bottom: 18px;
@@ -219,7 +204,6 @@ a:hover { color: var(--marca-700); }
 .barra span { display: block; height: 100%; background: var(--marca-600); }
 .fila-estado { display: grid; grid-template-columns: 130px 1fr 30px; gap: 10px; align-items: center; font-size: .88rem; margin-bottom: 10px; }
 
-/* ---------- Formularios ---------- */
 .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 18px; }
 .form-grid .ancho { grid-column: 1 / -1; }
 .form-campo label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: 6px; }
@@ -230,7 +214,6 @@ a:hover { color: var(--marca-700); }
 .form-pie { display: flex; gap: 10px; justify-content: flex-end; padding-top: 18px; margin-top: 8px; border-top: 1px solid var(--borde); }
 .form-contenedor { max-width: 820px; }
 
-/* ---------- Detalle / estructura ---------- */
 .datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
 .dato > span:first-child { display: block; font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); font-weight: 600; }
 .dato b { font-size: .98rem; }
@@ -262,6 +245,191 @@ a:hover { color: var(--marca-700); }
     .dos-columnas, .form-grid { grid-template-columns: 1fr; }
 }
 
-/* En las tablas los botones van en una sola línea. */
 .tabla .acciones { flex-wrap: nowrap; }
 .tabla td:last-child { width: 1%; white-space: nowrap; }
+
+.btn-salir { background: transparent; color: #c9d1e3; border-color: rgba(255, 255, 255, .25); }
+.btn-salir:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+.enlace-claro { color: var(--dorado); font-weight: 600; }
+.enlace-claro:hover { color: #e3b866; }
+.ancho-completo { width: 100%; justify-content: center; }
+
+body.sitio { background: #f7f7f5; }
+.sitio-interior { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+.sitio-barra { background: var(--blanco); border-bottom: 1px solid var(--borde); position: sticky; top: 0; z-index: 10; }
+.sitio-barra .sitio-interior { display: flex; align-items: center; gap: 28px; height: 68px; }
+.sitio-marca { display: flex; align-items: center; gap: 10px; color: var(--marca-900); font-size: 1.15rem; font-family: Georgia, serif; }
+.sitio-marca:hover { color: var(--marca-900); }
+.sitio-marca .brand-logo { background: var(--marca-900); }
+.sitio-menu { display: flex; gap: 22px; flex: 1; }
+.sitio-menu a { color: var(--texto-suave); font-weight: 600; font-size: .93rem; padding: 6px 0; border-bottom: 2px solid transparent; }
+.sitio-menu a:hover, .sitio-menu a.activo { color: var(--marca-900); border-bottom-color: var(--dorado); }
+.sitio-cuenta { display: flex; align-items: center; gap: 10px; }
+.sitio-usuario { display: flex; align-items: center; gap: 8px; font-size: .88rem; font-weight: 600; color: var(--marca-900); }
+.sitio-alertas { max-width: 1180px; margin: 0 auto; padding: 16px 24px 0; }
+.sitio-alertas:empty { display: none; }
+.sitio-contenido { min-height: calc(100vh - 200px); }
+
+.sitio-hero {
+    background: linear-gradient(120deg, rgba(20, 33, 61, .92), rgba(36, 57, 106, .85)),
+                linear-gradient(45deg, #1c2d52, #2f4b8a);
+    color: #fff; padding: 70px 0 80px;
+}
+.sitio-hero.chico { padding: 28px 0; }
+.sitio-hero h1 { font-family: Georgia, serif; font-size: 2.4rem; margin: 0 0 10px; max-width: 640px; }
+.sitio-hero p { color: #c9d1e3; font-size: 1.05rem; margin: 0 0 26px; max-width: 560px; }
+
+.buscador {
+    background: var(--blanco); border-radius: 10px; padding: 14px; display: flex; gap: 12px; align-items: flex-end;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .18); flex-wrap: wrap;
+}
+.buscador.en-hotel { box-shadow: none; padding: 0; }
+.buscador-campo { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 150px; }
+.buscador-campo.chico { max-width: 120px; min-width: 100px; }
+.buscador-campo label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); }
+.buscador-boton { height: 42px; padding: 0 22px; }
+
+.sitio-seccion { padding-top: 36px; padding-bottom: 20px; }
+.sitio-titulo { font-family: Georgia, serif; font-size: 1.6rem; color: var(--marca-900); margin: 0 0 16px; }
+
+.hotel-publico { display: flex; flex-direction: column; overflow: hidden; color: inherit; transition: transform .15s, box-shadow .15s; }
+.hotel-publico:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(20, 33, 61, .12); color: inherit; }
+.hotel-publico .panel-cuerpo { display: flex; flex-direction: column; gap: 6px; }
+.hotel-publico-imagen {
+    height: 150px; display: grid; place-items: center; color: var(--dorado);
+    background: linear-gradient(135deg, var(--marca-700), var(--marca-900));
+    font-family: Georgia, serif; font-size: 2.4rem; font-weight: 700; letter-spacing: .05em;
+}
+.hotel-publico-imagen.cat-5 { background: linear-gradient(135deg, #8a6420, var(--marca-900)); }
+.hotel-publico-imagen.cat-3, .hotel-publico-imagen.cat-2, .hotel-publico-imagen.cat-1 { background: linear-gradient(135deg, #4b5a78, #1f2a40); }
+.enlace-mas { color: var(--marca-600); font-weight: 600; font-size: .88rem; margin-top: 6px; }
+
+.grid-tipos { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.tipo-card .panel-cuerpo { display: flex; flex-direction: column; gap: 6px; }
+.tipo-nombre { font-weight: 700; font-size: 1.05rem; color: var(--marca-900); }
+.tipo-card p { margin: 0; color: var(--texto-suave); font-size: .88rem; flex: 1; }
+.tipo-precio { color: var(--texto-suave); font-size: .88rem; }
+.tipo-precio b { color: var(--marca-900); font-size: 1.05rem; }
+
+.lista-resultados { display: flex; flex-direction: column; gap: 14px; }
+.resultado { display: flex; align-items: stretch; overflow: hidden; }
+.resultado .hotel-publico-imagen { width: 190px; height: auto; min-height: 130px; font-size: 1.8rem; flex-shrink: 0; }
+.resultado-info { flex: 1; padding: 18px 20px; display: flex; flex-direction: column; gap: 5px; }
+.resultado-precio { padding: 18px 20px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 6px; text-align: right; border-left: 1px solid var(--borde); min-width: 230px; font-size: .9rem; color: var(--texto-suave); }
+.resultado-precio b { color: var(--marca-900); }
+.disponibles { color: var(--ok); font-weight: 700; }
+.sin-disponibilidad { color: var(--danger); font-weight: 600; }
+.total-grande { font-size: 1.35rem; font-weight: 800; color: var(--marca-900); }
+.habitacion-icono { width: 110px; display: grid; place-items: center; background: var(--marca-50); color: var(--marca-600); flex-shrink: 0; }
+.habitacion-icono svg { width: 40px; height: 40px; }
+
+.hotel-cabecera-publica { background: var(--marca-900); color: #fff; padding: 30px 0 34px; }
+.hotel-cabecera-publica h1 { font-family: Georgia, serif; font-size: 2.1rem; margin: 6px 0; }
+.hotel-cabecera-publica p { color: #c9d1e3; margin: 8px 0 0; }
+.hotel-cabecera-publica .hotel-ciudad { color: var(--dorado); }
+.volver { color: #c9d1e3; font-size: .85rem; display: inline-block; margin-bottom: 10px; }
+.volver:hover { color: #fff; }
+.reserva-caja { padding: 16px; margin-bottom: 22px; }
+
+.auth { display: flex; justify-content: center; padding: 50px 16px; }
+.auth-card { width: 100%; max-width: 420px; }
+.auth-card.ancho { max-width: 640px; }
+.auth-card h1 { font-family: Georgia, serif; color: var(--marca-900); font-size: 1.6rem; margin: 0 0 4px; }
+.auth-card .form-campo { margin-bottom: 14px; }
+.auth-pie { text-align: center; font-size: .88rem; color: var(--texto-suave); margin: 18px 0 0; }
+
+.resumen-reserva { border: 1px solid var(--borde); border-radius: var(--radio); margin: 16px 0; }
+.resumen-reserva div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--borde); font-size: .92rem; }
+.resumen-reserva div:last-child { border-bottom: none; }
+.resumen-reserva span { color: var(--texto-suave); }
+.resumen-reserva .total { background: var(--marca-50); font-size: 1.05rem; }
+
+.sitio-pie { background: var(--marca-900); color: #aab4cc; padding: 26px 0; margin-top: 40px; font-size: .85rem; }
+.sitio-pie .sitio-interior { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.sitio-pie b { color: #fff; }
+
+@media (max-width: 800px) {
+    .sitio-barra .sitio-interior { flex-wrap: wrap; height: auto; padding-top: 10px; padding-bottom: 10px; }
+    .resultado { flex-direction: column; }
+    .resultado .hotel-publico-imagen, .habitacion-icono { width: 100%; min-height: 90px; }
+    .resultado-precio { border-left: none; border-top: 1px solid var(--borde); align-items: flex-start; text-align: left; }
+    .sitio-hero h1 { font-size: 1.8rem; }
+}
+.hotel-cabecera-publica .hotel-ciudad { display: block; }
+
+.barra-superior { position: sticky; top: 0; z-index: 40; box-shadow: 0 2px 10px rgba(20, 33, 61, .18); }
+.barra-interior { max-width: 1360px; gap: 20px; }
+.brand { white-space: nowrap; }
+.menu { gap: 2px; }
+.menu a { padding: 0 11px; gap: 7px; white-space: nowrap; }
+.usuario-chip { white-space: nowrap; }
+.usuario { display: inline-flex; align-items: center; gap: 8px; color: #fff; }
+.usuario .avatar { width: 28px; height: 28px; font-size: .85rem; }
+
+.atajos {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    background: var(--blanco); border: 1px solid var(--borde); border-radius: var(--radio);
+    padding: 10px 14px; margin-bottom: 16px; box-shadow: var(--sombra);
+}
+.atajos-titulo { font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-suave); margin-right: 4px; }
+.atajo {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px;
+    background: var(--marca-50); border: 1px solid var(--marca-100); color: var(--marca-700); font-size: .85rem; font-weight: 600;
+}
+.atajo:hover { background: var(--marca-100); color: var(--marca-900); }
+.atajo svg { width: 15px; height: 15px; }
+
+.conteo { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.conteo b { min-width: 18px; }
+.enlace-mini { font-size: .8rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--marca-50); }
+.enlace-mini:hover { background: var(--marca-100); }
+
+.hotel-datos a { color: var(--texto-suave); border-radius: 6px; padding: 4px 0; }
+.hotel-datos a:hover { background: var(--marca-50); color: var(--marca-700); }
+
+@keyframes resaltar { 0% { background: var(--dorado-claro); } 70% { background: var(--dorado-claro); } 100% { background: transparent; } }
+.tabla tr.resaltado td { animation: resaltar 4s ease-out; }
+.tabla tr.resaltado td:first-child { box-shadow: inset 4px 0 0 var(--dorado); }
+.hotel-card.resaltado { box-shadow: 0 0 0 3px var(--dorado), var(--sombra); }
+.etiqueta-nuevo {
+    display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; vertical-align: middle;
+    background: var(--dorado); color: var(--marca-900); font-size: .7rem; font-weight: 700; letter-spacing: .03em;
+}
+
+.btn-arriba {
+    position: fixed; right: 24px; bottom: 24px; z-index: 30; width: 44px; height: 44px; border-radius: 50%;
+    border: none; background: var(--marca-900); color: #fff; font-size: 1.2rem; cursor: pointer;
+    box-shadow: 0 6px 18px rgba(20, 33, 61, .3); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+}
+.btn-arriba.visible { opacity: 1; pointer-events: auto; }
+.btn-arriba:hover { transform: translateY(-2px); background: var(--marca-700); }
+
+.pasos { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.paso { display: inline-flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--texto-suave); padding: 6px 12px 6px 6px; border-radius: 999px; background: var(--blanco); border: 1px solid var(--borde); }
+.paso b { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--muted-bg); font-size: .75rem; }
+.paso.hecho b { background: var(--ok-bg); color: var(--ok); }
+.paso.actual { border-color: var(--marca-600); color: var(--marca-700); font-weight: 600; }
+.paso.actual b { background: var(--marca-600); color: #fff; }
+
+.titulo-seccion { font-size: 1.05rem; font-weight: 700; color: var(--marca-900); margin: 6px 0 12px; scroll-margin-top: 90px; }
+.grid-eleccion { margin-bottom: 22px; }
+.hotel-eleccion {
+    display: flex; flex-direction: column; gap: 12px; text-align: left; font: inherit; color: inherit; cursor: pointer;
+    padding: 18px; border: 1px solid var(--borde); border-top: 4px solid var(--marca-600);
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+.hotel-eleccion.cat-5 { border-top-color: var(--dorado); }
+.hotel-eleccion:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(20, 33, 61, .12); }
+.hotel-eleccion.elegido { border-color: var(--dorado); box-shadow: 0 0 0 2px var(--dorado), 0 10px 24px rgba(20, 33, 61, .12); }
+.hotel-eleccion.agotado { cursor: not-allowed; opacity: .6; }
+.hotel-titulos { display: flex; flex-direction: column; gap: 2px; }
+.hotel-eleccion .hotel-cabecera .badge-app { margin-left: auto; align-self: flex-start; }
+.eleccion-datos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center; font-size: .74rem; color: var(--texto-suave); padding: 10px 0; border-top: 1px solid var(--borde); border-bottom: 1px solid var(--borde); }
+.eleccion-datos b { display: block; font-size: .98rem; color: var(--marca-900); }
+.eleccion-pie { font-size: .85rem; font-weight: 600; color: var(--marca-600); }
+.hotel-eleccion.agotado .eleccion-pie { color: var(--texto-suave); }
+
+.fila-elegible { cursor: pointer; }
+.tabla .fila-elegible:hover td { background: var(--marca-50); }
+.tabla .fila-elegible.elegida td { background: var(--dorado-claro); }
+.tabla .fila-elegible.elegida td:first-child { box-shadow: inset 4px 0 0 var(--dorado); }

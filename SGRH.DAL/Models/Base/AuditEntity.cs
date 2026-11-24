@@ -1,9 +1,5 @@
 namespace SGRH.DAL.Models.Base
 {
-    /// <summary>
-    /// Clase base de todas las entidades del sistema.
-    /// Agrupa el Id y los datos de auditoría para no repetirlos en cada entidad (DRY).
-    /// </summary>
     public abstract class AuditEntity
     {
         protected AuditEntity()
@@ -18,7 +14,6 @@ namespace SGRH.DAL.Models.Base
         public DateTime? FechaModificacion { get; set; }
         public int? UsuarioModificacion { get; set; }
 
-        /// <summary>true = activo, false = inactivo.</summary>
         public bool Estatus { get; set; }
 
         public virtual void Activar()
