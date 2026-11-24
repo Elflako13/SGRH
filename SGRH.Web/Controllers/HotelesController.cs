@@ -6,8 +6,7 @@ using SGRH.Web.Services;
 
 namespace SGRH.Web.Controllers
 {
-    /// <summary>Gestión de hoteles (CU-001) y consulta de la estructura del hotel (CU-006).</summary>
-    public class HotelesController : BaseController
+    public class HotelesController : AdminController
     {
         private readonly IHotelService hotelService;
         private readonly IBloqueService bloqueService;
@@ -25,7 +24,6 @@ namespace SGRH.Web.Controllers
             this.catalogo = catalogo;
         }
 
-        // GET: Hoteles
         public async Task<IActionResult> Index(HotelFiltro filtro)
         {
             var resultado = await hotelService.GetAllAsync();
@@ -37,13 +35,13 @@ namespace SGRH.Web.Controllers
                               .Where(h => filtro.Coincide(h.Nombre, h.Ciudad, h.Direccion))
                               .Where(h => string.IsNullOrEmpty(filtro.Ciudad) || h.Ciudad == filtro.Ciudad)
                               .Where(h => filtro.Estrellas is null || h.Estrellas == filtro.Estrellas)
+                              .OrderByDescending(h => h.HotelId)
                               .ToList();
 
             ViewBag.Ciudades = await catalogo.CiudadesAsync();
             return View(new ListadoViewModel<HotelModel, HotelFiltro> { Items = items, Filtro = filtro, Total = hoteles.Count });
         }
 
-        // GET: Hoteles/Details/5  -> estructura del hotel: bloques, pisos y habitaciones con su estado (RF-008)
         public async Task<IActionResult> Details(int id)
         {
             var hotel = await hotelService.GetByIdAsync(id);
@@ -63,22 +61,18 @@ namespace SGRH.Web.Controllers
             });
         }
 
-        // GET: Hoteles/Create
         public IActionResult Create() => View("Form", new HotelViewModel());
 
-        // POST: Hoteles/Create
         [HttpPost]
         public Task<IActionResult> Create(HotelViewModel modelo) =>
             GuardarAsync(modelo, () => hotelService.AddAsync(modelo.ToAdd(UsuarioActualId)), _ => Task.CompletedTask);
 
-        // GET: Hoteles/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             var hotel = await hotelService.GetByIdAsync(id);
             return hotel.Success ? View("Form", HotelViewModel.From(hotel.Data!)) : VolverAlListado(hotel.Message);
         }
 
-        // POST: Hoteles/Edit/5
         [HttpPost]
         public Task<IActionResult> Edit(int id, HotelViewModel modelo)
         {
@@ -86,12 +80,10 @@ namespace SGRH.Web.Controllers
             return GuardarAsync(modelo, () => hotelService.UpdateAsync(modelo.ToUpdate(UsuarioActualId)), _ => Task.CompletedTask);
         }
 
-        // POST: Hoteles/Inactivar/5
         [HttpPost]
         public Task<IActionResult> Inactivar(int id, string? volverA) =>
             EjecutarYVolverAsync(() => hotelService.RemoveAsync(new HotelRemove { Id = id, UsuarioModificacion = UsuarioActualId }), volverA);
 
-        // POST: Hoteles/Activar/5
         [HttpPost]
         public Task<IActionResult> Activar(int id, string? volverA) =>
             EjecutarYVolverAsync(() => hotelService.ActivarAsync(id, UsuarioActualId), volverA);

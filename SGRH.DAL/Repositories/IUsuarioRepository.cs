@@ -12,5 +12,7 @@ namespace SGRH.DAL.Repositories
         Task<OperationResult<bool>> RemoveAsync(UsuarioRemove usuario);
         Task<OperationResult<UsuarioModel>> GetByNombreUsuarioAsync(string nombreUsuario);
         Task<OperationResult<UsuarioModel>> ValidarCredencialesAsync(string nombreUsuario, string clave);
+        Task<bool> ExisteParaHuespedAsync(int huespedId);
+        Task<bool> ExisteCorreoAsync(string correo);
     }
 }

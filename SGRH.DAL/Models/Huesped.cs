@@ -2,7 +2,6 @@ using SGRH.DAL.Models.Base;
 
 namespace SGRH.DAL.Models
 {
-    /// <summary>Cliente que reserva. El documento es único (RN-017).</summary>
     public sealed class Huesped : AuditEntity
     {
         public string Nombre { get; set; } = string.Empty;
@@ -25,7 +24,6 @@ namespace SGRH.DAL.Models
             MarcarModificacion();
         }
 
-        /// <summary>Se usa antes de notificar (CU-015, flujo alterno 1a).</summary>
         public bool TieneContactoValido()
         {
             bool correoValido = !string.IsNullOrWhiteSpace(Correo) && Correo.Contains('@');

@@ -1,23 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using SGRH.DAL.Models.Result;
+using SGRH.Web.Models;
+using System.Security.Claims;
 
 namespace SGRH.Web.Controllers
 {
-    /// <summary>
-    /// Base de los controladores de mantenimiento. Agrupa lo que todos hacen igual (DRY):
-    /// mostrar el mensaje de resultado, guardar un formulario y activar o inactivar un registro.
-    /// </summary>
     public abstract class BaseController : Controller
     {
-        /// <summary>
-        /// Usuario que registra las operaciones. Mientras no exista el inicio de sesión
-        /// (próxima fase), se usa el administrador creado por el script (Id = 1).
-        /// </summary>
-        protected const int UsuarioActualId = 1;
+        protected int UsuarioActualId =>
+            int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int id) ? id : 1;
 
-        protected void Exito(string mensaje) => TempData["Exito"] = mensaje;
+        protected static string Limpiar(string mensaje) => Formato.Limpiar(mensaje);
 
-        protected void Error(string mensaje) => TempData["Error"] = mensaje;
+        protected void Exito(string mensaje) => TempData["Exito"] = Limpiar(mensaje);
+
+        protected void Error(string mensaje) => TempData["Error"] = Limpiar(mensaje);
 
         protected void Notificar<T>(OperationResult<T> resultado)
         {
@@ -27,17 +24,12 @@ namespace SGRH.Web.Controllers
                 Error(resultado.Message);
         }
 
-        /// <summary>Se usa cuando no se encuentra el registro pedido: vuelve al listado con el mensaje.</summary>
         protected IActionResult VolverAlListado(string mensaje)
         {
             Error(mensaje);
             return RedirectToAction("Index");
         }
 
-        /// <summary>
-        /// Flujo común de Crear y Editar: valida el formulario, llama al servicio y, si algo falla,
-        /// vuelve a mostrar el formulario con el mensaje de la regla de negocio que no se cumplió.
-        /// </summary>
         protected async Task<IActionResult> GuardarAsync<TViewModel>(TViewModel modelo,
                                                                      Func<Task<OperationResult<bool>>> guardar,
                                                                      Func<TViewModel, Task> cargarListas)
@@ -48,17 +40,17 @@ namespace SGRH.Web.Controllers
                 if (resultado.Success)
                 {
                     Exito(resultado.Message);
+                    TempData["Resaltar"] = RouteData.Values["id"]?.ToString() ?? "nuevo";
                     return RedirectToAction("Index");
                 }
 
-                ModelState.AddModelError(string.Empty, resultado.Message);
+                ModelState.AddModelError(string.Empty, Limpiar(resultado.Message));
             }
 
             await cargarListas(modelo);
             return View("Form", modelo);
         }
 
-        /// <summary>Activar, inactivar o cambiar estado: ejecuta la acción y regresa a la página anterior.</summary>
         protected async Task<IActionResult> EjecutarYVolverAsync(Func<Task<OperationResult<bool>>> accion, string? volverA)
         {
             Notificar(await accion());

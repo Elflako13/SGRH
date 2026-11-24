@@ -3,11 +3,20 @@
     ViewData["Seccion"] = "Habitaciones";
     ViewData["Title"] = Model.EsNuevo ? "Nueva habitación" : $"Editar habitación {Model.Numero}";
     ViewData["Descripcion"] = Model.EsNuevo
-        ? "Se registra en un piso activo; el número no se repite dentro del hotel (RN-004 a RN-006)."
-        : "Se puede cambiar el tipo, la capacidad y la tarifa (CU-004).";
+        ? "Se registra en un piso activo; el número no se repite dentro del hotel."
+        : "Se puede cambiar el tipo, la capacidad y la tarifa.";
     var tipos = (List<TipoHabitacionModel>)ViewBag.Tipos;
 }
 <partial name="_Encabezado" />
+@if (!Model.EsNuevo)
+{
+    <partial name="_Atajos" model='new (string, string?, string)[]
+    {
+        ("Ver habitación", Url.Action("Details", new { id = Model.Id }), "ver"),
+        ("Habitaciones del mismo piso", Url.Action("Index", new { HotelId = Model.HotelId, PisoId = Model.PisoId }), "piso"),
+        ("Estructura del hotel", Url.Action("Details", "Hoteles", new { id = Model.HotelId }), "hotel")
+    }' />
+}
 
 <div class="panel form-contenedor">
     <form method="post" asp-action="@(Model.EsNuevo ? "Create" : "Edit")" asp-route-id="@(Model.EsNuevo ? null : Model.Id)" class="panel-cuerpo">

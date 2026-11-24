@@ -8,11 +8,6 @@ using static SGRH.DAL.Models.Result.OperationResult;
 
 namespace SGRH.BL.Services
 {
-    /// <summary>
-    /// Notificaciones al huésped (RN-014, RN-015, CU-015, CU-016).
-    /// El envío real (correo, SMS) se conectará en la capa de presentación o infraestructura;
-    /// aquí está la lógica: canal por defecto, registro de resultados y reintentos.
-    /// </summary>
     public class NotificacionService : ServiceBase, INotificacionService
     {
         private readonly INotificacionRepository notificacionRepository;
@@ -37,7 +32,6 @@ namespace SGRH.BL.Services
                                 ?? (string.IsNullOrWhiteSpace(notificacion.Mensaje) ? "La notificación debe tener un mensaje." : null),
                           () =>
                           {
-                              // Si no se indica un canal válido, se usa el configurado en NotificacionOptions.
                               if (!Enum.IsDefined(notificacion.Canal))
                                   notificacion.Canal = notificacionOptions.CanalPorDefecto;
 
@@ -55,10 +49,6 @@ namespace SGRH.BL.Services
                     string.IsNullOrWhiteSpace(error) ? "Error no especificado." : error);
             });
 
-        /// <summary>
-        /// CU-016: recorre las fallidas que aún tienen intentos disponibles y vuelve a enviarlas.
-        /// Devuelve cuántas se enviaron con éxito. Un error en una no detiene a las demás (RN-015).
-        /// </summary>
         public Task<OperationResult<int>> ReintentarFallidasAsync(Func<NotificacionModel, Task<bool>> enviar) =>
             EjecutarAsync("reintentar notificaciones fallidas",
                           () => enviar is null ? "Debe indicar cómo se envían las notificaciones." : null,
@@ -81,7 +71,6 @@ namespace SGRH.BL.Services
                 }
                 catch (Exception ex)
                 {
-                    // Un error en una notificación no detiene a las demás (tolerancia a fallos).
                     logger.LogError(ex, "Error al reenviar la notificación {NotificacionId}. Tipo: {ExceptionType}.", notificacion.NotificacionId, ex.GetType().Name);
                     exito = false;
                     error = ex.Message;

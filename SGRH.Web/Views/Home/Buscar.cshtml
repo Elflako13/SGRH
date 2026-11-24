@@ -1,0 +1,54 @@
+@model BusquedaResultadoViewModel
+@{
+    ViewData["Title"] = "Resultados";
+    var b = Model.Busqueda;
+}
+<section class="sitio-hero chico">
+    <div class="sitio-interior">
+        <partial name="_Buscador" model="b" />
+    </div>
+</section>
+
+<section class="sitio-interior sitio-seccion">
+    <h2 class="sitio-titulo">@(string.IsNullOrEmpty(b.Ciudad) ? "Todos los destinos" : b.Ciudad)</h2>
+    <p class="resumen">@b.Entrada.ToString("dd/MM/yyyy") → @b.Salida.ToString("dd/MM/yyyy") · @b.Noches noche(s) · @b.Huespedes huésped(es)</p>
+
+    @if (Model.Error is not null)
+    {
+        <div class="alerta alerta-error">✕ @Model.Error</div>
+    }
+    else if (!Model.Resultados.Any())
+    {
+        <div class="panel"><partial name="_Vacio" model="@("No hay hoteles en ese destino.")" /></div>
+    }
+
+    <div class="lista-resultados">
+        @foreach (var r in Model.Resultados)
+        {
+            <div class="panel resultado">
+                <div class="hotel-publico-imagen cat-@r.Hotel.Estrellas"><span>@string.Concat(r.Hotel.Nombre.Replace("Hotel ", "").Split(' ').Take(2).Select(p => p[0]))</span></div>
+                <div class="resultado-info">
+                    <span class="hotel-ciudad">@r.Hotel.Ciudad</span>
+                    <span class="hotel-nombre">@r.Hotel.Nombre</span>
+                    <partial name="_Estrellas" model="r.Hotel.Estrellas" />
+                    <span class="hotel-dir">@r.Hotel.Direccion</span>
+                </div>
+                <div class="resultado-precio">
+                    @if (r.Disponibles > 0)
+                    {
+                        <span class="disponibles">@r.Disponibles habitación(es) disponible(s)</span>
+                        <span>Desde <b>@Formato.Moneda(r.DesdePorNoche!.Value)</b> / noche</span>
+                        <span class="total">Total desde @Formato.Moneda(r.TotalDesde!.Value)</span>
+                        <a class="btn-app btn-primario" asp-action="Hotel" asp-route-id="@r.Hotel.HotelId"
+                           asp-route-Entrada="@b.Entrada.ToString("yyyy-MM-dd")" asp-route-Salida="@b.Salida.ToString("yyyy-MM-dd")"
+                           asp-route-Huespedes="@b.Huespedes" asp-route-verDisponibilidad="true">Ver habitaciones</a>
+                    }
+                    else
+                    {
+                        <span class="sin-disponibilidad">Sin disponibilidad para esas fechas</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</section>

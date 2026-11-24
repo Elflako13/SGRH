@@ -3,7 +3,6 @@ using SGRH.DAL.Models.Objects.Hotel;
 
 namespace SGRH.Web.Models
 {
-    /// <summary>Datos del panel de inicio.</summary>
     public class InicioViewModel
     {
         public int Hoteles { get; set; }

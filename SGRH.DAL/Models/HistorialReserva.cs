@@ -1,9 +1,5 @@
 namespace SGRH.DAL.Models
 {
-    /// <summary>
-    /// Bitácora de cambios de una reserva (RF-021, RNF-007). Solo guarda datos:
-    /// no hereda de AuditEntity porque un registro de auditoría no se modifica ni se inactiva.
-    /// </summary>
     public sealed class HistorialReserva
     {
         public int Id { get; set; }

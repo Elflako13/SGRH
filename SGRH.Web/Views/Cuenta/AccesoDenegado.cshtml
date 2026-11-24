@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "Acceso denegado";
+}
+<section class="auth">
+    <div class="panel auth-card">
+        <div class="panel-cuerpo">
+            <h1>No tiene acceso a esta página</h1>
+            @if (User.IsInRole("Administrador"))
+            {
+                <p class="resumen">Las reservas en línea son para clientes. Como administrador puede registrar reservas desde el panel de administración.</p>
+                <a class="btn-app btn-primario" asp-controller="Reservas" asp-action="Index">Ir a Reservas</a>
+            }
+            else
+            {
+                <p class="resumen">Esta sección es solo para el personal del hotel.</p>
+                <a class="btn-app btn-primario" asp-controller="Home" asp-action="Index">Volver al inicio</a>
+            }
+        </div>
+    </div>
+</section>

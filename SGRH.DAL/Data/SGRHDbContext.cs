@@ -78,7 +78,6 @@ namespace SGRH.DAL.Data
                  .HasForeignKey(b => b.HotelId)
                  .OnDelete(DeleteBehavior.Restrict);
 
-                // No se repite el nombre del bloque dentro del mismo hotel.
                 e.HasIndex(b => new { b.HotelId, b.Nombre }).IsUnique();
             });
 
@@ -100,13 +99,11 @@ namespace SGRH.DAL.Data
                  .HasForeignKey(p => p.BloqueId)
                  .OnDelete(DeleteBehavior.NoAction);
 
-                // RN-002: un piso pertenece a un solo hotel.
                 e.HasOne(p => p.Hotel)
                  .WithMany(h => h.Pisos)
                  .HasForeignKey(p => p.HotelId)
                  .OnDelete(DeleteBehavior.Restrict);
 
-                // RN-003: no puede haber dos pisos ACTIVOS con el mismo número en el hotel.
                 e.HasIndex(p => new { p.HotelId, p.Numero })
                  .IsUnique()
                  .HasFilter("[Estatus] = 1");
@@ -118,7 +115,6 @@ namespace SGRH.DAL.Data
                 e.Property(h => h.Numero).IsRequired().HasMaxLength(10);
                 e.Property(h => h.TarifaPorNoche).HasPrecision(10, 2);
 
-                // RN-004: la habitación pertenece a un piso.
                 e.HasOne(h => h.Piso)
                  .WithMany(p => p.Habitaciones)
                  .HasForeignKey(h => h.PisoId)
@@ -134,7 +130,6 @@ namespace SGRH.DAL.Data
                  .HasForeignKey(h => h.TipoHabitacionId)
                  .OnDelete(DeleteBehavior.Restrict);
 
-                // RN-005: el número de habitación es único dentro del hotel.
                 e.HasIndex(h => new { h.HotelId, h.Numero }).IsUnique();
             });
         }
@@ -151,7 +146,6 @@ namespace SGRH.DAL.Data
                 e.Property(h => h.Telefono).HasMaxLength(20);
                 e.Ignore(h => h.NombreCompleto);
 
-                // RN-017: el documento del huésped es único.
                 e.HasIndex(h => h.Documento).IsUnique();
             });
 
@@ -162,10 +156,8 @@ namespace SGRH.DAL.Data
                 e.Property(r => r.PrecioTotal).HasPrecision(12, 2);
                 e.Property(r => r.MotivoCancelacion).HasMaxLength(250);
 
-                // Control de concurrencia: evita dos guardados simultáneos sobre la misma reserva.
                 e.Property(r => r.RowVersion).IsRowVersion();
 
-                // El objeto de valor RangoFechas se guarda en la misma tabla (FechaEntrada / FechaSalida).
                 e.OwnsOne(r => r.Fechas, f =>
                 {
                     f.Property(x => x.Entrada).HasColumnName("FechaEntrada").IsRequired();
@@ -233,6 +225,15 @@ namespace SGRH.DAL.Data
                 e.Property(u => u.ClaveHash).IsRequired().HasMaxLength(256);
 
                 e.HasIndex(u => u.NombreUsuario).IsUnique();
+
+                e.HasOne(u => u.Huesped)
+                 .WithMany()
+                 .HasForeignKey(u => u.HuespedId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasIndex(u => u.HuespedId)
+                 .IsUnique()
+                 .HasFilter("[HuespedId] IS NOT NULL");
             });
         }
     }

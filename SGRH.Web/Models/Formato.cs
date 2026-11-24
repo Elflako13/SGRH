@@ -1,8 +1,8 @@
 using SGRH.DAL.Models;
+using System.Text.RegularExpressions;
 
 namespace SGRH.Web.Models
 {
-    /// <summary>Textos y estilos que se repiten en varias vistas (DRY).</summary>
     public static class Formato
     {
         public static string Estado(EstadoHabitacion estado) => estado switch
@@ -25,5 +25,14 @@ namespace SGRH.Web.Models
         };
 
         public static string Moneda(decimal valor) => $"RD$ {valor:N2}";
+
+        public static string Iniciales(string nombreHotel)
+        {
+            var palabras = nombreHotel.Replace("Hotel ", "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return string.Concat(palabras.Take(2).Select(p => char.ToUpper(p[0])));
+        }
+
+        public static string Limpiar(string mensaje) =>
+            Regex.Replace(mensaje, @"\s*\((?:CU|RN|RNF|RF)-\d{3}[^)]*\)", string.Empty);
     }
 }

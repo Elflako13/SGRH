@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SGRH.Web.Models
 {
-    /// <summary>Formulario de hotel (CU-001). Las anotaciones validan en el navegador y en el servidor.</summary>
     public class HotelViewModel
     {
         public int Id { get; set; }

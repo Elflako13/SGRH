@@ -5,10 +5,6 @@ using SGRH.DAL.Models;
 
 namespace SGRH.BL.Tests.Base
 {
-    /// <summary>
-    /// Base de datos SQLite en memoria para probar los repositorios sin SQL Server.
-    /// Cada prueba crea su propia base de datos limpia.
-    /// </summary>
     public sealed class TestDatabase : IDisposable
     {
         private readonly SqliteConnection _connection;
@@ -26,10 +22,6 @@ namespace SGRH.BL.Tests.Base
 
         public SGRHDbContext CrearContexto() => new SGRHDbContext(_options);
 
-        /// <summary>
-        /// Crea un hotel con el piso 1 (habitaciones 101 y 102) y el piso 2 (habitación 201),
-        /// y un huésped. Devuelve los Id generados.
-        /// </summary>
         public DatosDePrueba Sembrar()
         {
             using var context = CrearContexto();
@@ -66,7 +58,6 @@ namespace SGRH.BL.Tests.Base
                                 int HuespedId,
                                 int TipoSencillaId, int TipoDobleId, int TipoSuiteId);
 
-    /// <summary>Tipos de habitación de prueba. Cada llamada crea un objeto nuevo.</summary>
     public static class Tipos
     {
         public static TipoHabitacion Sencilla => new() { Nombre = "Sencilla", TarifaBase = 1800m };

@@ -6,8 +6,7 @@ using SGRH.Web.Services;
 
 namespace SGRH.Web.Controllers
 {
-    /// <summary>Gestión de bloques (torres o edificios) de cada hotel.</summary>
-    public class BloquesController : BaseController
+    public class BloquesController : AdminController
     {
         private readonly IBloqueService bloqueService;
         private readonly ICatalogoService catalogo;
@@ -18,7 +17,6 @@ namespace SGRH.Web.Controllers
             this.catalogo = catalogo;
         }
 
-        // GET: Bloques
         public async Task<IActionResult> Index(HotelHijoFiltro filtro)
         {
             var resultado = await bloqueService.GetAllAsync();
@@ -29,13 +27,13 @@ namespace SGRH.Web.Controllers
             var items = filtro.AplicarEstado(bloques, b => b.Estatus)
                               .Where(b => filtro.HotelId is null || b.HotelId == filtro.HotelId)
                               .Where(b => filtro.Coincide(b.Nombre, b.Descripcion, b.Hotel))
+                              .OrderByDescending(b => b.BloqueId)
                               .ToList();
 
             ViewBag.Hoteles = await catalogo.HotelesAsync(filtro.HotelId);
             return View(new ListadoViewModel<BloqueModel, HotelHijoFiltro> { Items = items, Filtro = filtro, Total = bloques.Count });
         }
 
-        // GET: Bloques/Create?hotelId=1
         public async Task<IActionResult> Create(int? hotelId)
         {
             var modelo = new BloqueViewModel { HotelId = hotelId ?? 0 };
@@ -47,7 +45,6 @@ namespace SGRH.Web.Controllers
         public Task<IActionResult> Create(BloqueViewModel modelo) =>
             GuardarAsync(modelo, () => bloqueService.AddAsync(modelo.ToAdd(UsuarioActualId)), CargarListasAsync);
 
-        // GET: Bloques/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             var bloque = await bloqueService.GetByIdAsync(id);
@@ -74,7 +71,6 @@ namespace SGRH.Web.Controllers
         public Task<IActionResult> Activar(int id, string? volverA) =>
             EjecutarYVolverAsync(() => bloqueService.ActivarAsync(id, UsuarioActualId), volverA);
 
-        // GET: Bloques/PorHotel?hotelId=1  -> lo usa el formulario de pisos para llenar la lista de bloques
         public async Task<IActionResult> PorHotel(int hotelId)
         {
             var lista = await catalogo.BloquesAsync(hotelId);

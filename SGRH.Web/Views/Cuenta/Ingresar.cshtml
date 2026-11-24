@@ -1,0 +1,30 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+<section class="auth">
+    <div class="panel auth-card">
+        <div class="panel-cuerpo">
+            <h1>Iniciar sesión</h1>
+            <p class="resumen">Entre a su cuenta para reservar y ver sus reservas.</p>
+            <form method="post" asp-action="Ingresar">
+                <partial name="_Validacion" />
+                <input type="hidden" asp-for="ReturnUrl" />
+                <div class="form-campo">
+                    <label asp-for="Usuario"></label>
+                    <input class="control" asp-for="Usuario" autofocus />
+                    <span asp-validation-for="Usuario"></span>
+                </div>
+                <div class="form-campo">
+                    <label asp-for="Clave"></label>
+                    <input class="control" asp-for="Clave" />
+                    <span asp-validation-for="Clave"></span>
+                </div>
+                <button type="submit" class="btn-app btn-primario ancho-completo">Entrar</button>
+            </form>
+            <p class="auth-pie">¿No tiene cuenta? <a asp-action="Registro" asp-route-returnUrl="@Model.ReturnUrl">Crear una cuenta</a></p>
+        </div>
+    </div>
+</section>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

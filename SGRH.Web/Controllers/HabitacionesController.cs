@@ -7,8 +7,7 @@ using SGRH.Web.Services;
 
 namespace SGRH.Web.Controllers
 {
-    /// <summary>Gestión de habitaciones: registrar (CU-003), actualizar (CU-004) y cambiar estado (CU-005).</summary>
-    public class HabitacionesController : BaseController
+    public class HabitacionesController : AdminController
     {
         private readonly IHabitacionService habitacionService;
         private readonly ICatalogoService catalogo;
@@ -19,7 +18,6 @@ namespace SGRH.Web.Controllers
             this.catalogo = catalogo;
         }
 
-        // GET: Habitaciones
         public async Task<IActionResult> Index(HabitacionFiltro filtro)
         {
             var resultado = await habitacionService.GetAllAsync();
@@ -33,6 +31,7 @@ namespace SGRH.Web.Controllers
                               .Where(h => filtro.TipoHabitacionId is null || h.TipoHabitacionId == filtro.TipoHabitacionId)
                               .Where(h => filtro.EstadoOperativo is null || h.Estado == filtro.EstadoOperativo)
                               .Where(h => filtro.Coincide(h.Numero, h.Hotel, h.Tipo, h.Bloque))
+                              .OrderByDescending(h => h.HabitacionId)
                               .ToList();
 
             ViewBag.Hoteles = await catalogo.HotelesAsync(filtro.HotelId);
@@ -42,7 +41,6 @@ namespace SGRH.Web.Controllers
             return View(new ListadoViewModel<HabitacionModel, HabitacionFiltro> { Items = items, Filtro = filtro, Total = habitaciones.Count });
         }
 
-        // GET: Habitaciones/Details/5
         public async Task<IActionResult> Details(int id)
         {
             var habitacion = await habitacionService.GetByIdAsync(id);
@@ -53,10 +51,9 @@ namespace SGRH.Web.Controllers
             return View(habitacion.Data);
         }
 
-        // GET: Habitaciones/Create?hotelId=1
-        public async Task<IActionResult> Create(int? hotelId)
+        public async Task<IActionResult> Create(int? hotelId, int? pisoId)
         {
-            var modelo = new HabitacionViewModel { HotelId = hotelId ?? 0 };
+            var modelo = new HabitacionViewModel { HotelId = hotelId ?? 0, PisoId = pisoId ?? 0 };
             await CargarListasAsync(modelo);
             return View("Form", modelo);
         }
@@ -65,7 +62,6 @@ namespace SGRH.Web.Controllers
         public Task<IActionResult> Create(HabitacionViewModel modelo) =>
             GuardarAsync(modelo, () => habitacionService.AddAsync(modelo.ToAdd(UsuarioActualId)), CargarListasAsync);
 
-        // GET: Habitaciones/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             var habitacion = await habitacionService.GetByIdAsync(id);
@@ -84,7 +80,6 @@ namespace SGRH.Web.Controllers
             return GuardarAsync(modelo, () => habitacionService.UpdateAsync(modelo.ToUpdate(UsuarioActualId)), CargarListasAsync);
         }
 
-        // POST: Habitaciones/CambiarEstado/5  (CU-005, RN-007, RN-018)
         [HttpPost]
         public Task<IActionResult> CambiarEstado(int id, EstadoHabitacion estado, string? volverA) =>
             EjecutarYVolverAsync(() => habitacionService.CambiarEstadoAsync(id, estado, UsuarioActualId), volverA);
